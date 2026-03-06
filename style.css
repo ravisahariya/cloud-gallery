@@ -1,0 +1,58 @@
+
+body{
+  margin:0;
+  font-family:Arial;
+  background:#f2f2f2;
+}
+
+header{
+  background:#2196f3;
+  color:white;
+  text-align:center;
+  padding:15px;
+}
+
+.topbar{
+  padding:10px;
+  text-align:center;
+  background:white;
+}
+
+button{
+  padding:8px 14px;
+  background:#2196f3;
+  color:white;
+  border:none;
+  border-radius:5px;
+  margin-left:5px;
+}
+
+input[type="text"]{
+  padding:8px;
+  margin-left:10px;
+}
+
+.gallery{
+  display:grid;
+  grid-template-columns:repeat(2,1fr);
+  gap:10px;
+  padding:10px;
+}
+
+.card{
+  background:white;
+  border-radius:10px;
+  overflow:hidden;
+  position:relative;
+}
+
+.card img{
+  width:100%;
+}
+
+.actions{
+  display:flex;
+  justify-content:space-around;
+  padding:6px;
+  font-size:14px;
+}
