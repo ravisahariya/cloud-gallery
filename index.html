@@ -5,7 +5,6 @@
 <title>My Cloud Photos</title>
 
 <style>
-
 body{
 font-family:Arial;
 background:#f2f2f2;
@@ -23,15 +22,6 @@ padding:10px;
 width:100%;
 border-radius:10px;
 }
-
-button{
-padding:10px;
-background:#2196f3;
-color:white;
-border:none;
-border-radius:5px;
-}
-
 </style>
 
 </head>
@@ -49,30 +39,28 @@ border-radius:5px;
 
 <script>
 
-const API_KEY="f1545b77a00b23f145e952d78a71e4ca"
-
 function upload(){
 
 let file=document.getElementById("fileInput").files[0]
 
-let formData=new FormData()
+if(!file){
+alert("पहले फोटो चुनें")
+return
+}
 
-formData.append("image",file)
+let reader=new FileReader()
 
-fetch("https://api.imgbb.com/1/upload?key="+API_KEY,{
-method:"POST",
-body:formData
-})
-.then(res=>res.json())
-.then(data=>{
+reader.onload=function(e){
 
 let img=document.createElement("img")
 
-img.src=data.data.display_url
+img.src=e.target.result
 
 document.getElementById("gallery").appendChild(img)
 
-})
+}
+
+reader.readAsDataURL(file)
 
 }
 
