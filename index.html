@@ -12,11 +12,24 @@ background:#f2f2f2;
 text-align:center;
 }
 
+.gallery{
+display:grid;
+grid-template-columns:repeat(2,1fr);
+gap:10px;
+padding:10px;
+}
+
 .gallery img{
 width:100%;
-max-width:200px;
-margin:10px;
 border-radius:10px;
+}
+
+button{
+padding:10px;
+background:#2196f3;
+color:white;
+border:none;
+border-radius:5px;
 }
 
 </style>
@@ -50,14 +63,12 @@ fetch("https://api.imgbb.com/1/upload?key="+API_KEY,{
 method:"POST",
 body:formData
 })
-
 .then(res=>res.json())
-
 .then(data=>{
 
 let img=document.createElement("img")
 
-img.src=data.data.url
+img.src=data.data.display_url
 
 document.getElementById("gallery").appendChild(img)
 
