@@ -2,49 +2,21 @@
 <html>
 <head>
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>My Cloud Gallery</title>
+<title>My Cloud Photos</title>
 
 <style>
 
 body{
 font-family:Arial;
 background:#f2f2f2;
-margin:0;
-}
-
-header{
-background:#1976d2;
-color:white;
-padding:15px;
 text-align:center;
-font-size:22px;
-}
-
-.upload{
-background:white;
-padding:15px;
-margin:10px;
-border-radius:10px;
-}
-
-.gallery{
-display:grid;
-grid-template-columns:repeat(3,1fr);
-gap:10px;
-padding:10px;
 }
 
 .gallery img{
 width:100%;
+max-width:200px;
+margin:10px;
 border-radius:10px;
-}
-
-button{
-padding:10px;
-border:none;
-background:#1976d2;
-color:white;
-border-radius:5px;
 }
 
 </style>
@@ -53,40 +25,43 @@ border-radius:5px;
 
 <body>
 
-<header>
-My Cloud Photos
-</header>
-
-<div class="upload">
+<h2>My Cloud Photos</h2>
 
 <input type="file" id="fileInput">
 <br><br>
 
 <button onclick="upload()">Upload</button>
 
-</div>
-
 <div class="gallery" id="gallery"></div>
 
 <script>
+
+const API_KEY="f1545b77a00b23f145e952d78a71e4ca"
 
 function upload(){
 
 let file=document.getElementById("fileInput").files[0]
 
-let reader=new FileReader()
+let formData=new FormData()
 
-reader.onload=function(){
+formData.append("image",file)
+
+fetch("https://api.imgbb.com/1/upload?key="+API_KEY,{
+method:"POST",
+body:formData
+})
+
+.then(res=>res.json())
+
+.then(data=>{
 
 let img=document.createElement("img")
 
-img.src=reader.result
+img.src=data.data.url
 
 document.getElementById("gallery").appendChild(img)
 
-}
-
-reader.readAsDataURL(file)
+})
 
 }
 
