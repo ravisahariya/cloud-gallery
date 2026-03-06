@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>My Cloud Gallery</title>
+
+<style>
+
+body{
+font-family:Arial;
+background:#f2f2f2;
+margin:0;
+}
+
+header{
+background:#1976d2;
+color:white;
+padding:15px;
+text-align:center;
+font-size:22px;
+}
+
+.upload{
+background:white;
+padding:15px;
+margin:10px;
+border-radius:10px;
+}
+
+.gallery{
+display:grid;
+grid-template-columns:repeat(3,1fr);
+gap:10px;
+padding:10px;
+}
+
+.gallery img{
+width:100%;
+border-radius:10px;
+}
+
+button{
+padding:10px;
+border:none;
+background:#1976d2;
+color:white;
+border-radius:5px;
+}
+
+</style>
+
+</head>
+
+<body>
+
+<header>
+My Cloud Photos
+</header>
+
+<div class="upload">
+
+<input type="file" id="fileInput">
+<br><br>
+
+<button onclick="upload()">Upload</button>
+
+</div>
+
+<div class="gallery" id="gallery"></div>
+
+<script>
+
+function upload(){
+
+let file=document.getElementById("fileInput").files[0]
+
+let reader=new FileReader()
+
+reader.onload=function(){
+
+let img=document.createElement("img")
+
+img.src=reader.result
+
+document.getElementById("gallery").appendChild(img)
+
+}
+
+reader.readAsDataURL(file)
+
+}
+
+</script>
+
+</body>
+</html>
