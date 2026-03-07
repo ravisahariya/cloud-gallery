@@ -1,141 +1,53 @@
-<!DOCTYPE html>
-<html>
-<head>
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Secure Vault</title>
+<script type="module">
 
-<style>
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import { getFirestore, addDoc, collection, getDocs } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-body{
-font-family:Arial;
-background:#0f172a;
-color:white;
-text-align:center;
-padding:30px;
-}
+const firebaseConfig = {
+apiKey: "YOUR_KEY",
+authDomain: "YOUR_DOMAIN",
+projectId: "YOUR_PROJECT_ID",
+storageBucket: "YOUR_BUCKET",
+messagingSenderId: "YOUR_ID",
+appId: "YOUR_APP_ID"
+};
 
-.box{
-background:#1e293b;
-padding:20px;
-border-radius:10px;
-max-width:400px;
-margin:auto;
-}
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
 
-input,textarea{
-width:90%;
-padding:10px;
-margin:5px;
-border:none;
-border-radius:5px;
-}
+window.saveData = async function(){
 
-button{
-padding:10px 20px;
-margin:5px;
-border:none;
-border-radius:5px;
-background:#22c55e;
-color:white;
-}
+let title=document.getElementById("title").value
+let password=document.getElementById("password").value
+let note=document.getElementById("note").value
 
-</style>
+await addDoc(collection(db,"vault"),{
+title:title,
+password:password,
+note:note
+})
 
-</head>
-
-<body>
-
-<div class="box" id="loginBox">
-
-<h2>🔐 Login</h2>
-
-<input type="password" id="master" placeholder="Master Password">
-
-<br>
-
-<button onclick="login()">Login</button>
-
-</div>
-
-<div class="box" id="vault" style="display:none">
-
-<h2>My Secure Vault</h2>
-
-<input id="title" placeholder="Account">
-
-<input id="password" placeholder="Password">
-
-<textarea id="note" placeholder="Note"></textarea>
-
-<br>
-
-<button onclick="saveData()">Save</button>
-
-<button onclick="showData()">Show</button>
-
-<div id="result"></div>
-
-</div>
-
-<script>
-
-let masterPassword="1234"
-
-function login(){
-
-let pass=document.getElementById("master").value
-
-if(pass==masterPassword){
-
-document.getElementById("loginBox").style.display="none"
-
-document.getElementById("vault").style.display="block"
-
-}else{
-
-alert("Wrong Password")
+alert("Saved Online")
 
 }
 
-}
+window.showData = async function(){
 
-function saveData(){
+let querySnapshot = await getDocs(collection(db,"vault"))
 
-let data={
+let html=""
 
-title:document.getElementById("title").value,
+querySnapshot.forEach((doc)=>{
+let data=doc.data()
 
-password:document.getElementById("password").value,
+html += "<h3>"+data.title+"</h3>"
+html += "<p>"+data.password+"</p>"
+html += "<p>"+data.note+"</p><hr>"
 
-note:document.getElementById("note").value
+})
 
-}
-
-localStorage.setItem("vault",JSON.stringify(data))
-
-alert("Saved")
-
-}
-
-function showData(){
-
-let data=JSON.parse(localStorage.getItem("vault"))
-
-if(data){
-
-document.getElementById("result").innerHTML=
-
-"<h3>"+data.title+"</h3>"+
-
-"<p>"+data.password+"</p>"+
-
-"<p>"+data.note+"</p>"
-
-}
+document.getElementById("result").innerHTML=html
 
 }
 
 </script>
-
-</body>
-</html>
