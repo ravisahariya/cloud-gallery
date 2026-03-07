@@ -1,26 +1,141 @@
-
 <!DOCTYPE html>
 <html>
 <head>
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>My Cloud Gallery</title>
-<link rel="stylesheet" href="style.css">
+<title>Secure Vault</title>
+
+<style>
+
+body{
+font-family:Arial;
+background:#0f172a;
+color:white;
+text-align:center;
+padding:30px;
+}
+
+.box{
+background:#1e293b;
+padding:20px;
+border-radius:10px;
+max-width:400px;
+margin:auto;
+}
+
+input,textarea{
+width:90%;
+padding:10px;
+margin:5px;
+border:none;
+border-radius:5px;
+}
+
+button{
+padding:10px 20px;
+margin:5px;
+border:none;
+border-radius:5px;
+background:#22c55e;
+color:white;
+}
+
+</style>
+
 </head>
 
 <body>
 
-<header>
-  <h2>My Cloud Photos</h2>
-</header>
+<div class="box" id="loginBox">
 
-<div class="topbar">
-  <input type="file" id="fileInput">
-  <button onclick="upload()">Upload</button>
-  <input type="text" id="search" placeholder="Search..." onkeyup="searchImages()">
+<h2>🔐 Login</h2>
+
+<input type="password" id="master" placeholder="Master Password">
+
+<br>
+
+<button onclick="login()">Login</button>
+
 </div>
 
-<div class="gallery" id="gallery"></div>
+<div class="box" id="vault" style="display:none">
 
-<script src="app.js"></script>
+<h2>My Secure Vault</h2>
+
+<input id="title" placeholder="Account">
+
+<input id="password" placeholder="Password">
+
+<textarea id="note" placeholder="Note"></textarea>
+
+<br>
+
+<button onclick="saveData()">Save</button>
+
+<button onclick="showData()">Show</button>
+
+<div id="result"></div>
+
+</div>
+
+<script>
+
+let masterPassword="1234"
+
+function login(){
+
+let pass=document.getElementById("master").value
+
+if(pass==masterPassword){
+
+document.getElementById("loginBox").style.display="none"
+
+document.getElementById("vault").style.display="block"
+
+}else{
+
+alert("Wrong Password")
+
+}
+
+}
+
+function saveData(){
+
+let data={
+
+title:document.getElementById("title").value,
+
+password:document.getElementById("password").value,
+
+note:document.getElementById("note").value
+
+}
+
+localStorage.setItem("vault",JSON.stringify(data))
+
+alert("Saved")
+
+}
+
+function showData(){
+
+let data=JSON.parse(localStorage.getItem("vault"))
+
+if(data){
+
+document.getElementById("result").innerHTML=
+
+"<h3>"+data.title+"</h3>"+
+
+"<p>"+data.password+"</p>"+
+
+"<p>"+data.note+"</p>"
+
+}
+
+}
+
+</script>
+
 </body>
 </html>
