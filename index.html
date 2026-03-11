@@ -45,12 +45,7 @@ border-radius:6px;
 font-size:16px;
 }
 
-a{
-font-size:14px;
-cursor:pointer;
-}
-
-#registerBox,#home{
+#registerBox,#dashboard{
 display:none;
 }
 
@@ -74,8 +69,6 @@ display:none;
 
 <p>New User ? <a onclick="showRegister()">Register</a></p>
 
-<p><a onclick="forgot()">Forgot Password</a></p>
-
 </div>
 
 
@@ -96,7 +89,7 @@ display:none;
 
 
 
-<div class="box" id="home">
+<div class="box" id="dashboard">
 
 <h2>Dashboard</h2>
 
@@ -112,33 +105,16 @@ display:none;
 
 let users = JSON.parse(localStorage.getItem("users")) || []
 
-
 function register(){
 
 let u=regUser.value
 let p=regPass.value
 
-if(!u || !p){
-
-alert("Fill all fields")
-return
-
-}
-
-let exist=users.find(x=>x.user==u)
-
-if(exist){
-
-alert("User already exists")
-return
-
-}
-
 users.push({user:u,pass:p})
 
 localStorage.setItem("users",JSON.stringify(users))
 
-alert("Registration Success")
+alert("Account Created")
 
 showLogin()
 
@@ -151,27 +127,29 @@ function login(){
 let u=loginUser.value
 let p=loginPass.value
 
-if(u=="admin" && p=="admin123"){
+
+if(u==="admin" && p==="admin123"){
 
 localStorage.setItem("session","admin")
 
-showHome()
+showDashboard()
 
 return
 
 }
 
-let found=users.find(x=>x.user==u && x.pass==p)
+
+let found=users.find(x=>x.user===u && x.pass===p)
 
 if(found){
 
 localStorage.setItem("session",u)
 
-showHome()
+showDashboard()
 
 }else{
 
-alert("Wrong ID or Password")
+alert("Wrong Login")
 
 }
 
@@ -189,26 +167,6 @@ location.reload()
 
 
 
-function forgot(){
-
-let u=prompt("Enter User ID")
-
-let found=users.find(x=>x.user==u)
-
-if(found){
-
-alert("Password : "+found.pass)
-
-}else{
-
-alert("User not found")
-
-}
-
-}
-
-
-
 function showRegister(){
 
 loginBox.style.display="none"
@@ -221,4 +179,35 @@ registerBox.style.display="block"
 function showLogin(){
 
 registerBox.style.display="none"
-loginBox.style
+loginBox.style.display="block"
+
+}
+
+
+
+function showDashboard(){
+
+loginBox.style.display="none"
+registerBox.style.display="none"
+dashboard.style.display="block"
+
+}
+
+
+
+window.onload=function(){
+
+let s=localStorage.getItem("session")
+
+if(s){
+
+showDashboard()
+
+}
+
+}
+
+</script>
+
+</body>
+</html>
