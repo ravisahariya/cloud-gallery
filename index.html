@@ -4,7 +4,7 @@
 
 <meta name="viewport" content="width=device-width,initial-scale=1">
 
-<title>Secure Login</title>
+<title>Admin System</title>
 
 <style>
 
@@ -21,7 +21,7 @@ align-items:center;
 .box{
 background:white;
 padding:25px;
-width:300px;
+width:320px;
 border-radius:12px;
 text-align:center;
 box-shadow:0 5px 15px rgba(0,0,0,0.2);
@@ -29,7 +29,7 @@ box-shadow:0 5px 15px rgba(0,0,0,0.2);
 
 input{
 width:100%;
-padding:12px;
+padding:10px;
 margin:6px 0;
 border:1px solid #ccc;
 border-radius:6px;
@@ -37,16 +37,26 @@ border-radius:6px;
 
 button{
 width:100%;
-padding:12px;
+padding:10px;
+margin-top:6px;
 background:#3a7bd5;
 color:white;
 border:none;
 border-radius:6px;
-font-size:16px;
 }
 
-#registerBox,#dashboard{
+#dashboard,#admin,#register{
 display:none;
+}
+
+table{
+width:100%;
+font-size:12px;
+}
+
+td{
+border-bottom:1px solid #ccc;
+padding:4px;
 }
 
 </style>
@@ -57,13 +67,13 @@ display:none;
 
 
 
-<div class="box" id="loginBox">
+<div class="box" id="login">
 
 <h2>Login</h2>
 
-<input id="loginUser" placeholder="User ID">
+<input id="user" placeholder="User ID">
 
-<input type="password" id="loginPass" placeholder="Password">
+<input type="password" id="pass" placeholder="Password">
 
 <button onclick="login()">Login</button>
 
@@ -73,15 +83,15 @@ display:none;
 
 
 
-<div class="box" id="registerBox">
+<div class="box" id="register">
 
 <h2>Register</h2>
 
-<input id="regUser" placeholder="User ID">
+<input id="newuser" placeholder="User ID">
 
-<input type="password" id="regPass" placeholder="Password">
+<input type="password" id="newpass" placeholder="Password">
 
-<button onclick="register()">Create Account</button>
+<button onclick="registerUser()">Create Account</button>
 
 <p><a onclick="showLogin()">Back Login</a></p>
 
@@ -91,9 +101,11 @@ display:none;
 
 <div class="box" id="dashboard">
 
-<h2>Dashboard</h2>
+<h2>User Dashboard</h2>
 
-<p>Login Success</p>
+<input id="name" placeholder="Name">
+
+<button onclick="markAttendance()">Mark Attendance</button>
 
 <button onclick="logout()">Logout</button>
 
@@ -101,45 +113,50 @@ display:none;
 
 
 
+<div class="box" id="admin">
+
+<h2>Admin Panel</h2>
+
+<button onclick="download()">Download Attendance</button>
+
+<button onclick="logout()">Logout</button>
+
+<hr>
+
+<table>
+
+<tbody id="list"></tbody>
+
+</table>
+
+</div>
+
+
+
 <script>
 
-let users = JSON.parse(localStorage.getItem("users")) || []
+let users=JSON.parse(localStorage.getItem("users"))||[]
 
-function register(){
-
-let u=regUser.value
-let p=regPass.value
-
-users.push({user:u,pass:p})
-
-localStorage.setItem("users",JSON.stringify(users))
-
-alert("Account Created")
-
-showLogin()
-
-}
+let attendance=JSON.parse(localStorage.getItem("attendance"))||[]
 
 
 
 function login(){
 
-let u=loginUser.value
-let p=loginPass.value
+let u=user.value
+let p=pass.value
 
-
-if(u==="admin" && p==="admin123"){
+if(u=="admin" && p=="admin123"){
 
 localStorage.setItem("session","admin")
 
-showDashboard()
+showAdmin()
 
 return
 
 }
 
-
-let found=users.find(x=>x.user===u && x.pass===p)
+let found=users.find(x=>x.user==u && x.pass==p)
 
 if(found){
 
@@ -157,6 +174,63 @@ alert("Wrong Login")
 
 
 
+function registerUser(){
+
+users.push({
+
+user:newuser.value,
+pass:newpass.value
+
+})
+
+localStorage.setItem("users",JSON.stringify(users))
+
+alert("User Created")
+
+showLogin()
+
+}
+
+
+
+function showRegister(){
+
+login.style.display="none"
+register.style.display="block"
+
+}
+
+
+
+function showLogin(){
+
+register.style.display="none"
+login.style.display="block"
+
+}
+
+
+
+function showDashboard(){
+
+login.style.display="none"
+dashboard.style.display="block"
+
+}
+
+
+
+function showAdmin(){
+
+login.style.display="none"
+admin.style.display="block"
+
+show()
+
+}
+
+
+
 function logout(){
 
 localStorage.removeItem("session")
@@ -167,29 +241,69 @@ location.reload()
 
 
 
-function showRegister(){
+function markAttendance(){
 
-loginBox.style.display="none"
-registerBox.style.display="block"
+let now=new Date()
+
+attendance.push({
+
+name:name.value,
+date:now.toLocaleDateString(),
+time:now.toLocaleTimeString()
+
+})
+
+localStorage.setItem("attendance",JSON.stringify(attendance))
+
+alert("Attendance Marked")
 
 }
 
 
 
-function showLogin(){
+function show(){
 
-registerBox.style.display="none"
-loginBox.style.display="block"
+let html=""
+
+attendance.forEach((x,i)=>{
+
+html+=`
+
+<tr>
+<td>${x.name}</td>
+<td>${x.date}</td>
+<td>${x.time}</td>
+</tr>
+
+`
+
+})
+
+list.innerHTML=html
 
 }
 
 
 
-function showDashboard(){
+function download(){
 
-loginBox.style.display="none"
-registerBox.style.display="none"
-dashboard.style.display="block"
+let csv="Name,Date,Time\n"
+
+attendance.forEach(x=>{
+
+csv+=x.name+","+x.date+","+x.time+"\n"
+
+})
+
+let blob=new Blob([csv])
+
+let a=document.createElement("a")
+
+a.href=URL.createObjectURL(blob)
+
+a.download="attendance.csv"
+
+a.click()
 
 }
 
@@ -199,7 +313,11 @@ window.onload=function(){
 
 let s=localStorage.getItem("session")
 
-if(s){
+if(s=="admin"){
+
+showAdmin()
+
+}else if(s){
 
 showDashboard()
 
