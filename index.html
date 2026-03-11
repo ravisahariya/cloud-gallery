@@ -4,15 +4,15 @@
 
 <meta name="viewport" content="width=device-width,initial-scale=1">
 
-<title>Admin System</title>
+<title>Admin Data System</title>
 
 <style>
 
 body{
 margin:0;
 font-family:Arial;
-height:100vh;
 background:linear-gradient(120deg,#3a7bd5,#00d2ff);
+height:100vh;
 display:flex;
 justify-content:center;
 align-items:center;
@@ -21,16 +21,16 @@ align-items:center;
 .box{
 background:white;
 padding:25px;
-width:320px;
+width:330px;
 border-radius:12px;
 text-align:center;
 box-shadow:0 5px 15px rgba(0,0,0,0.2);
 }
 
-input{
+input,textarea{
 width:100%;
 padding:10px;
-margin:6px 0;
+margin:5px 0;
 border:1px solid #ccc;
 border-radius:6px;
 }
@@ -38,14 +38,14 @@ border-radius:6px;
 button{
 width:100%;
 padding:10px;
-margin-top:6px;
+margin-top:5px;
 background:#3a7bd5;
 color:white;
 border:none;
 border-radius:6px;
 }
 
-#dashboard,#admin,#register{
+#register,#dashboard,#admin{
 display:none;
 }
 
@@ -56,7 +56,7 @@ font-size:12px;
 
 td{
 border-bottom:1px solid #ccc;
-padding:4px;
+padding:3px;
 }
 
 </style>
@@ -71,13 +71,15 @@ padding:4px;
 
 <h2>Login</h2>
 
-<input id="user" placeholder="User ID">
+<input id="loginUser" placeholder="User ID">
 
-<input type="password" id="pass" placeholder="Password">
+<input type="password" id="loginPass" placeholder="Password">
 
 <button onclick="login()">Login</button>
 
 <p>New User ? <a onclick="showRegister()">Register</a></p>
+
+<p><a onclick="forgot()">Forgot Password</a></p>
 
 </div>
 
@@ -87,9 +89,9 @@ padding:4px;
 
 <h2>Register</h2>
 
-<input id="newuser" placeholder="User ID">
+<input id="regUser" placeholder="User ID">
 
-<input type="password" id="newpass" placeholder="Password">
+<input type="password" id="regPass" placeholder="Password">
 
 <button onclick="registerUser()">Create Account</button>
 
@@ -105,7 +107,15 @@ padding:4px;
 
 <input id="name" placeholder="Name">
 
-<button onclick="markAttendance()">Mark Attendance</button>
+<input id="mobile" placeholder="Mobile">
+
+<input id="address" placeholder="Address">
+
+<input type="date" id="date">
+
+<textarea id="note" placeholder="Note"></textarea>
+
+<button onclick="saveData()">Save Data</button>
 
 <button onclick="logout()">Logout</button>
 
@@ -117,11 +127,13 @@ padding:4px;
 
 <h2>Admin Panel</h2>
 
-<button onclick="download()">Download Attendance</button>
+<button onclick="download()">Download Excel</button>
 
 <button onclick="logout()">Logout</button>
 
 <hr>
+
+<input id="search" placeholder="Search" onkeyup="searchData()">
 
 <table>
 
@@ -137,14 +149,14 @@ padding:4px;
 
 let users=JSON.parse(localStorage.getItem("users"))||[]
 
-let attendance=JSON.parse(localStorage.getItem("attendance"))||[]
+let data=JSON.parse(localStorage.getItem("data"))||[]
 
 
 
 function login(){
 
-let u=user.value
-let p=pass.value
+let u=loginUser.value
+let p=loginPass.value
 
 if(u=="admin" && p=="admin123"){
 
@@ -176,18 +188,33 @@ alert("Wrong Login")
 
 function registerUser(){
 
-users.push({
-
-user:newuser.value,
-pass:newpass.value
-
-})
+users.push({user:regUser.value,pass:regPass.value})
 
 localStorage.setItem("users",JSON.stringify(users))
 
-alert("User Created")
+alert("User Registered")
 
 showLogin()
+
+}
+
+
+
+function forgot(){
+
+let u=prompt("Enter User ID")
+
+let found=users.find(x=>x.user==u)
+
+if(found){
+
+alert("Password : "+found.pass)
+
+}else{
+
+alert("User Not Found")
+
+}
 
 }
 
@@ -225,7 +252,7 @@ function showAdmin(){
 login.style.display="none"
 admin.style.display="block"
 
-show()
+showData()
 
 }
 
@@ -241,38 +268,41 @@ location.reload()
 
 
 
-function markAttendance(){
+function saveData(){
 
-let now=new Date()
-
-attendance.push({
+let obj={
 
 name:name.value,
-date:now.toLocaleDateString(),
-time:now.toLocaleTimeString()
+mobile:mobile.value,
+address:address.value,
+date:date.value,
+note:note.value
 
-})
+}
 
-localStorage.setItem("attendance",JSON.stringify(attendance))
+data.push(obj)
 
-alert("Attendance Marked")
+localStorage.setItem("data",JSON.stringify(data))
+
+alert("Data Saved")
 
 }
 
 
 
-function show(){
+function showData(){
 
 let html=""
 
-attendance.forEach((x,i)=>{
+data.forEach((x,i)=>{
 
 html+=`
 
 <tr>
 <td>${x.name}</td>
+<td>${x.mobile}</td>
 <td>${x.date}</td>
-<td>${x.time}</td>
+<td><button onclick="del(${i})">X</button></td>
 </tr>
 
 `
@@ -285,13 +315,56 @@ list.innerHTML=html
 
 
 
+function del(i){
+
+data.splice(i,1)
+
+localStorage.setItem("data",JSON.stringify(data))
+
+showData()
+
+}
+
+
+
+function searchData(){
+
+let s=search.value.toLowerCase()
+
+let html=""
+
+data.forEach((x,i)=>{
+
+if(x.name.toLowerCase().includes(s)){
+
+html+=`
+
+<tr>
+<td>${x.name}</td>
+<td>${x.mobile}</td>
+<td>${x.date}</td>
+<td><button onclick="del(${i})">X</button></td>
+</tr>
+
+`
+
+}
+
+})
+
+list.innerHTML=html
+
+}
+
+
+
 function download(){
 
-let csv="Name,Date,Time\n"
+let csv="Name,Mobile,Address,Date,Note\n"
 
-attendance.forEach(x=>{
+data.forEach(x=>{
 
-csv+=x.name+","+x.date+","+x.time+"\n"
+csv+=x.name+","+x.mobile+","+x.address+","+x.date+","+x.note+"\n"
 
 })
 
@@ -301,7 +374,7 @@ let a=document.createElement("a")
 
 a.href=URL.createObjectURL(blob)
 
-a.download="attendance.csv"
+a.download="data.csv"
 
 a.click()
 
