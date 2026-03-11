@@ -1,53 +1,288 @@
-<script type="module">
+<!DOCTYPE html>
+<html>
+<head>
 
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-import { getFirestore, addDoc, collection, getDocs } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+<meta name="viewport" content="width=device-width,initial-scale=1">
 
-const firebaseConfig = {
-apiKey: "YOUR_KEY",
-authDomain: "YOUR_DOMAIN",
-projectId: "YOUR_PROJECT_ID",
-storageBucket: "YOUR_BUCKET",
-messagingSenderId: "YOUR_ID",
-appId: "YOUR_APP_ID"
-};
+<title>Secure Login</title>
 
-const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
+<style>
 
-window.saveData = async function(){
+body{
+margin:0;
+font-family:Arial;
+height:100vh;
+background:linear-gradient(120deg,#3a7bd5,#00d2ff);
+display:flex;
+justify-content:center;
+align-items:center;
+}
 
-let title=document.getElementById("title").value
-let password=document.getElementById("password").value
-let note=document.getElementById("note").value
+.box{
 
-await addDoc(collection(db,"vault"),{
-title:title,
-password:password,
-note:note
-})
-
-alert("Saved Online")
+background:white;
+padding:25px;
+width:300px;
+border-radius:10px;
+text-align:center;
+box-shadow:0 0 10px rgba(0,0,0,0.2);
 
 }
 
-window.showData = async function(){
+input{
 
-let querySnapshot = await getDocs(collection(db,"vault"))
+width:100%;
+padding:10px;
+margin:6px 0;
+border:1px solid #ccc;
+border-radius:5px;
+
+}
+
+button{
+
+width:100%;
+padding:10px;
+margin-top:8px;
+background:#3a7bd5;
+color:white;
+border:none;
+border-radius:5px;
+
+}
+
+a{
+
+font-size:13px;
+
+}
+
+#home,#register,#admin{
+
+display:none;
+
+}
+
+</style>
+
+</head>
+
+
+<body>
+
+
+
+<div class="box" id="login">
+
+<h3>Login</h3>
+
+<input id="user" placeholder="User ID">
+
+<input type="password" id="pass" placeholder="Password">
+
+<button onclick="login()">Login</button>
+
+<p>New User ? <a onclick="showRegister()">Register</a></p>
+
+<p><a onclick="forgot()">Forgot Password</a></p>
+
+</div>
+
+
+
+<div class="box" id="register">
+
+<h3>Create Account</h3>
+
+<input id="newuser" placeholder="User ID">
+
+<input type="password" id="newpass" placeholder="Password">
+
+<button onclick="register()">Register</button>
+
+<p><a onclick="showLogin()">Back Login</a></p>
+
+</div>
+
+
+
+<div class="box" id="home">
+
+<h3>Dashboard</h3>
+
+<p>Login Success</p>
+
+<button onclick="logout()">Logout</button>
+
+</div>
+
+
+
+<div class="box" id="admin">
+
+<h3>Admin Panel</h3>
+
+<button onclick="showUsers()">All Users</button>
+
+<div id="list"></div>
+
+<button onclick="logout()">Logout</button>
+
+</div>
+
+
+
+<script>
+
+let users = JSON.parse(localStorage.getItem("users")) || [];
+
+function register(){
+
+let u=newuser.value
+let p=newpass.value
+
+if(!u || !p){
+
+alert("Fill All Fields")
+return
+
+}
+
+let exist=users.find(x=>x.user==u)
+
+if(exist){
+
+alert("User Already Exists")
+return
+
+}
+
+users.push({user:u,pass:p})
+
+localStorage.setItem("users",JSON.stringify(users))
+
+alert("Account Created")
+
+showLogin()
+
+}
+
+
+
+function login(){
+
+let u=user.value
+let p=pass.value
+
+
+if(u=="admin" && p=="admin123"){
+
+login.style.display="none"
+admin.style.display="block"
+return
+
+}
+
+
+let found=users.find(x=>x.user==u && x.pass==p)
+
+if(found){
+
+localStorage.setItem("session",u)
+
+login.style.display="none"
+home.style.display="block"
+
+}else{
+
+alert("Wrong Login")
+
+}
+
+}
+
+
+
+function logout(){
+
+localStorage.removeItem("session")
+
+location.reload()
+
+}
+
+
+
+function forgot(){
+
+let u=prompt("Enter User ID")
+
+let found=users.find(x=>x.user==u)
+
+if(found){
+
+alert("Password : "+found.pass)
+
+}else{
+
+alert("User Not Found")
+
+}
+
+}
+
+
+
+function showRegister(){
+
+login.style.display="none"
+register.style.display="block"
+
+}
+
+
+
+function showLogin(){
+
+register.style.display="none"
+login.style.display="block"
+
+}
+
+
+
+function showUsers(){
 
 let html=""
 
-querySnapshot.forEach((doc)=>{
-let data=doc.data()
+users.forEach(x=>{
 
-html += "<h3>"+data.title+"</h3>"
-html += "<p>"+data.password+"</p>"
-html += "<p>"+data.note+"</p><hr>"
+html+=x.user+"<br>"
 
 })
 
-document.getElementById("result").innerHTML=html
+list.innerHTML=html
+
+}
+
+
+
+window.onload=function(){
+
+let s=localStorage.getItem("session")
+
+if(s){
+
+login.style.display="none"
+home.style.display="block"
+
+}
 
 }
 
 </script>
+
+
+
+</body>
+</html>
