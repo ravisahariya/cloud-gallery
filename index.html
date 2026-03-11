@@ -4,111 +4,105 @@
 
 <meta name="viewport" content="width=device-width,initial-scale=1">
 
-<title>Attendance System</title>
+<title>Secure Login</title>
 
 <style>
 
 body{
 margin:0;
 font-family:Arial;
+height:100vh;
 background:linear-gradient(120deg,#3a7bd5,#00d2ff);
 display:flex;
 justify-content:center;
 align-items:center;
-height:100vh;
 }
 
 .box{
 background:white;
-padding:20px;
-width:320px;
-border-radius:10px;
-box-shadow:0 0 10px rgba(0,0,0,0.2);
+padding:25px;
+width:300px;
+border-radius:12px;
 text-align:center;
+box-shadow:0 5px 15px rgba(0,0,0,0.2);
 }
 
 input{
 width:100%;
-padding:8px;
+padding:12px;
 margin:6px 0;
 border:1px solid #ccc;
-border-radius:5px;
+border-radius:6px;
 }
 
 button{
 width:100%;
-padding:10px;
-margin-top:6px;
+padding:12px;
 background:#3a7bd5;
 color:white;
 border:none;
-border-radius:5px;
+border-radius:6px;
+font-size:16px;
 }
 
-#admin,#user{
+a{
+font-size:14px;
+cursor:pointer;
+}
+
+#registerBox,#home{
 display:none;
-}
-
-table{
-width:100%;
-font-size:12px;
-}
-
-td{
-border-bottom:1px solid #ccc;
 }
 
 </style>
 
 </head>
 
-
 <body>
 
 
-<div class="box" id="login">
 
-<h3>Login</h3>
+<div class="box" id="loginBox">
 
-<input id="userId" placeholder="User ID">
+<h2>Login</h2>
 
-<input type="password" id="pass">
+<input id="loginUser" placeholder="User ID">
+
+<input type="password" id="loginPass" placeholder="Password">
 
 <button onclick="login()">Login</button>
 
-</div>
+<p>New User ? <a onclick="showRegister()">Register</a></p>
 
-
-
-<div class="box" id="user">
-
-<h3>Mark Attendance</h3>
-
-<input id="name" placeholder="Name">
-
-<button onclick="mark()">Mark Attendance</button>
-
-<button onclick="logout()">Logout</button>
+<p><a onclick="forgot()">Forgot Password</a></p>
 
 </div>
 
 
 
-<div class="box" id="admin">
+<div class="box" id="registerBox">
 
-<h3>Admin Panel</h3>
+<h2>Register</h2>
 
-<button onclick="download()">Download Attendance</button>
+<input id="regUser" placeholder="User ID">
+
+<input type="password" id="regPass" placeholder="Password">
+
+<button onclick="register()">Create Account</button>
+
+<p><a onclick="showLogin()">Back Login</a></p>
+
+</div>
+
+
+
+<div class="box" id="home">
+
+<h2>Dashboard</h2>
+
+<p>Login Success</p>
 
 <button onclick="logout()">Logout</button>
-
-<hr>
-
-<table>
-
-<tbody id="list"></tbody>
-
-</table>
 
 </div>
 
@@ -116,24 +110,68 @@ border-bottom:1px solid #ccc;
 
 <script>
 
-let attendance=JSON.parse(localStorage.getItem("attendance"))||[]
+let users = JSON.parse(localStorage.getItem("users")) || []
+
+
+function register(){
+
+let u=regUser.value
+let p=regPass.value
+
+if(!u || !p){
+
+alert("Fill all fields")
+return
+
+}
+
+let exist=users.find(x=>x.user==u)
+
+if(exist){
+
+alert("User already exists")
+return
+
+}
+
+users.push({user:u,pass:p})
+
+localStorage.setItem("users",JSON.stringify(users))
+
+alert("Registration Success")
+
+showLogin()
+
+}
+
+
 
 function login(){
 
-let u=userId.value
-let p=pass.value
+let u=loginUser.value
+let p=loginPass.value
 
 if(u=="admin" && p=="admin123"){
 
-login.style.display="none"
-admin.style.display="block"
+localStorage.setItem("session","admin")
 
-show()
+showHome()
+
+return
+
+}
+
+let found=users.find(x=>x.user==u && x.pass==p)
+
+if(found){
+
+localStorage.setItem("session",u)
+
+showHome()
 
 }else{
 
-login.style.display="none"
-user.style.display="block"
+alert("Wrong ID or Password")
 
 }
 
@@ -143,92 +181,44 @@ user.style.display="block"
 
 function logout(){
 
+localStorage.removeItem("session")
+
 location.reload()
 
 }
 
 
 
-function mark(){
+function forgot(){
 
-let now=new Date()
+let u=prompt("Enter User ID")
 
-let obj={
+let found=users.find(x=>x.user==u)
 
-name:name.value,
-date:now.toLocaleDateString(),
-time:now.toLocaleTimeString()
+if(found){
 
-}
+alert("Password : "+found.pass)
 
-attendance.push(obj)
+}else{
 
-localStorage.setItem("attendance",JSON.stringify(attendance))
-
-alert("Attendance Marked")
+alert("User not found")
 
 }
-
-
-
-function show(){
-
-let html=""
-
-attendance.forEach((x,i)=>{
-
-html+=`
-<tr>
-<td>${x.name}</td>
-<td>${x.date}</td>
-<td>${x.time}</td>
-<td><button onclick="del(${i})">X</button></td>
-</tr>
-`
-
-})
-
-list.innerHTML=html
 
 }
 
 
 
-function del(i){
+function showRegister(){
 
-attendance.splice(i,1)
-
-localStorage.setItem("attendance",JSON.stringify(attendance))
-
-show()
+loginBox.style.display="none"
+registerBox.style.display="block"
 
 }
 
 
 
-function download(){
+function showLogin(){
 
-let csv="Name,Date,Time\n"
-
-attendance.forEach(x=>{
-
-csv+=x.name+","+x.date+","+x.time+"\n"
-
-})
-
-let blob=new Blob([csv])
-
-let a=document.createElement("a")
-
-a.href=URL.createObjectURL(blob)
-
-a.download="attendance.csv"
-
-a.click()
-
-}
-
-</script>
-
-</body>
-</html>
+registerBox.style.display="none"
+loginBox.style
