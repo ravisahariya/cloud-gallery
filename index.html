@@ -19,28 +19,23 @@ align-items:center;
 }
 
 .box{
-
 background:white;
 padding:25px;
 width:300px;
 border-radius:10px;
 text-align:center;
 box-shadow:0 0 10px rgba(0,0,0,0.2);
-
 }
 
 input{
-
 width:100%;
 padding:10px;
 margin:6px 0;
 border:1px solid #ccc;
 border-radius:5px;
-
 }
 
 button{
-
 width:100%;
 padding:10px;
 margin-top:8px;
@@ -48,19 +43,10 @@ background:#3a7bd5;
 color:white;
 border:none;
 border-radius:5px;
-
-}
-
-a{
-
-font-size:13px;
-
 }
 
 #home,#register,#admin{
-
 display:none;
-
 }
 
 </style>
@@ -71,13 +57,11 @@ display:none;
 <body>
 
 
-
-<div class="box" id="login">
+<div class="box" id="loginBox">
 
 <h3>Login</h3>
 
 <input id="user" placeholder="User ID">
-
 <input type="password" id="pass" placeholder="Password">
 
 <button onclick="login()">Login</button>
@@ -90,12 +74,11 @@ display:none;
 
 
 
-<div class="box" id="register">
+<div class="box" id="registerBox">
 
 <h3>Create Account</h3>
 
 <input id="newuser" placeholder="User ID">
-
 <input type="password" id="newpass" placeholder="Password">
 
 <button onclick="register()">Register</button>
@@ -136,6 +119,8 @@ display:none;
 
 let users = JSON.parse(localStorage.getItem("users")) || [];
 
+
+
 function register(){
 
 let u=newuser.value
@@ -171,14 +156,16 @@ showLogin()
 
 function login(){
 
-let u=user.value
-let p=pass.value
+let u=document.getElementById("user").value
+let p=document.getElementById("pass").value
 
 
 if(u=="admin" && p=="admin123"){
 
-login.style.display="none"
-admin.style.display="block"
+localStorage.setItem("session","admin")
+
+showAdmin()
+
 return
 
 }
@@ -190,8 +177,7 @@ if(found){
 
 localStorage.setItem("session",u)
 
-login.style.display="none"
-home.style.display="block"
+showHome()
 
 }else{
 
@@ -235,8 +221,8 @@ alert("User Not Found")
 
 function showRegister(){
 
-login.style.display="none"
-register.style.display="block"
+loginBox.style.display="none"
+registerBox.style.display="block"
 
 }
 
@@ -244,8 +230,27 @@ register.style.display="block"
 
 function showLogin(){
 
-register.style.display="none"
-login.style.display="block"
+registerBox.style.display="none"
+loginBox.style.display="block"
+
+}
+
+
+
+function showHome(){
+
+loginBox.style.display="none"
+registerBox.style.display="none"
+home.style.display="block"
+
+}
+
+
+
+function showAdmin(){
+
+loginBox.style.display="none"
+admin.style.display="block"
 
 }
 
@@ -271,18 +276,19 @@ window.onload=function(){
 
 let s=localStorage.getItem("session")
 
-if(s){
+if(s=="admin"){
 
-login.style.display="none"
-home.style.display="block"
+showAdmin()
+
+}else if(s){
+
+showHome()
 
 }
 
 }
 
 </script>
-
-
 
 </body>
 </html>
