@@ -2,403 +2,79 @@
 <html>
 <head>
 
-<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Smart Document Locker</title>
 
-<title>Admin Data System</title>
+<link rel="stylesheet" href="style.css">
 
-<style>
-
-body{
-margin:0;
-font-family:Arial;
-background:linear-gradient(120deg,#3a7bd5,#00d2ff);
-height:100vh;
-display:flex;
-justify-content:center;
-align-items:center;
-}
-
-.box{
-background:white;
-padding:25px;
-width:330px;
-border-radius:12px;
-text-align:center;
-box-shadow:0 5px 15px rgba(0,0,0,0.2);
-}
-
-input,textarea{
-width:100%;
-padding:10px;
-margin:5px 0;
-border:1px solid #ccc;
-border-radius:6px;
-}
-
-button{
-width:100%;
-padding:10px;
-margin-top:5px;
-background:#3a7bd5;
-color:white;
-border:none;
-border-radius:6px;
-}
-
-#register,#dashboard,#admin{
-display:none;
-}
-
-table{
-width:100%;
-font-size:12px;
-}
-
-td{
-border-bottom:1px solid #ccc;
-padding:3px;
-}
-
-</style>
+<link rel="stylesheet"
+href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.css"/>
 
 </head>
 
 <body>
 
-
-
-<div class="box" id="login">
+<div id="loginPage">
 
 <h2>Login</h2>
 
-<input id="loginUser" placeholder="User ID">
+<input id="username" placeholder="Username">
 
-<input type="password" id="loginPass" placeholder="Password">
+<input id="password" type="password" placeholder="Password">
 
 <button onclick="login()">Login</button>
 
-<p>New User ? <a onclick="showRegister()">Register</a></p>
-
-<p><a onclick="forgot()">Forgot Password</a></p>
-
 </div>
 
 
+<div id="appPage" style="display:none">
 
-<div class="box" id="register">
+<header>
 
-<h2>Register</h2>
+Smart Document Locker
 
-<input id="regUser" placeholder="User ID">
+<button class="logout" onclick="logout()">Logout</button>
 
-<input type="password" id="regPass" placeholder="Password">
+</header>
 
-<button onclick="registerUser()">Create Account</button>
+<div class="container">
 
-<p><a onclick="showLogin()">Back Login</a></p>
+<input id="docname" placeholder="Document Name">
 
-</div>
+<button onclick="openGallery()">Upload</button>
 
-
-
-<div class="box" id="dashboard">
-
-<h2>User Dashboard</h2>
-
-<input id="name" placeholder="Name">
-
-<input id="mobile" placeholder="Mobile">
-
-<input id="address" placeholder="Address">
-
-<input type="date" id="date">
-
-<textarea id="note" placeholder="Note"></textarea>
-
-<button onclick="saveData()">Save Data</button>
-
-<button onclick="logout()">Logout</button>
-
-</div>
-
-
-
-<div class="box" id="admin">
-
-<h2>Admin Panel</h2>
-
-<button onclick="download()">Download Excel</button>
-
-<button onclick="logout()">Logout</button>
+<input type="file" id="galleryInput" accept="image/*" style="display:none">
 
 <hr>
 
-<input id="search" placeholder="Search" onkeyup="searchData()">
+<div id="list"></div>
 
-<table>
-
-<tbody id="list"></tbody>
-
-</table>
+</div>
 
 </div>
 
 
+<div id="editorPage" style="display:none">
 
-<script>
+<h3>Edit Photo</h3>
 
-let users=JSON.parse(localStorage.getItem("users"))||[]
+<img id="editorImage">
 
-let data=JSON.parse(localStorage.getItem("data"))||[]
+<br>
 
+<button onclick="rotate()">Rotate</button>
 
+<button onclick="applyFilter()">Filter</button>
 
-function login(){
+<button onclick="saveEdit()">Save</button>
 
-let u=loginUser.value
-let p=loginPass.value
+<button onclick="closeEditor()">Cancel</button>
 
-if(u=="admin" && p=="admin123"){
+</div>
 
-localStorage.setItem("session","admin")
 
-showAdmin()
+<script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.js"></script>
 
-return
-
-}
-
-let found=users.find(x=>x.user==u && x.pass==p)
-
-if(found){
-
-localStorage.setItem("session",u)
-
-showDashboard()
-
-}else{
-
-alert("Wrong Login")
-
-}
-
-}
-
-
-
-function registerUser(){
-
-users.push({user:regUser.value,pass:regPass.value})
-
-localStorage.setItem("users",JSON.stringify(users))
-
-alert("User Registered")
-
-showLogin()
-
-}
-
-
-
-function forgot(){
-
-let u=prompt("Enter User ID")
-
-let found=users.find(x=>x.user==u)
-
-if(found){
-
-alert("Password : "+found.pass)
-
-}else{
-
-alert("User Not Found")
-
-}
-
-}
-
-
-
-function showRegister(){
-
-login.style.display="none"
-register.style.display="block"
-
-}
-
-
-
-function showLogin(){
-
-register.style.display="none"
-login.style.display="block"
-
-}
-
-
-
-function showDashboard(){
-
-login.style.display="none"
-dashboard.style.display="block"
-
-}
-
-
-
-function showAdmin(){
-
-login.style.display="none"
-admin.style.display="block"
-
-showData()
-
-}
-
-
-
-function logout(){
-
-localStorage.removeItem("session")
-
-location.reload()
-
-}
-
-
-
-function saveData(){
-
-let obj={
-
-name:name.value,
-mobile:mobile.value,
-address:address.value,
-date:date.value,
-note:note.value
-
-}
-
-data.push(obj)
-
-localStorage.setItem("data",JSON.stringify(data))
-
-alert("Data Saved")
-
-}
-
-
-
-function showData(){
-
-let html=""
-
-data.forEach((x,i)=>{
-
-html+=`
-
-<tr>
-<td>${x.name}</td>
-<td>${x.mobile}</td>
-<td>${x.date}</td>
-<td><button onclick="del(${i})">X</button></td>
-</tr>
-
-`
-
-})
-
-list.innerHTML=html
-
-}
-
-
-
-function del(i){
-
-data.splice(i,1)
-
-localStorage.setItem("data",JSON.stringify(data))
-
-showData()
-
-}
-
-
-
-function searchData(){
-
-let s=search.value.toLowerCase()
-
-let html=""
-
-data.forEach((x,i)=>{
-
-if(x.name.toLowerCase().includes(s)){
-
-html+=`
-
-<tr>
-<td>${x.name}</td>
-<td>${x.mobile}</td>
-<td>${x.date}</td>
-<td><button onclick="del(${i})">X</button></td>
-</tr>
-
-`
-
-}
-
-})
-
-list.innerHTML=html
-
-}
-
-
-
-function download(){
-
-let csv="Name,Mobile,Address,Date,Note\n"
-
-data.forEach(x=>{
-
-csv+=x.name+","+x.mobile+","+x.address+","+x.date+","+x.note+"\n"
-
-})
-
-let blob=new Blob([csv])
-
-let a=document.createElement("a")
-
-a.href=URL.createObjectURL(blob)
-
-a.download="data.csv"
-
-a.click()
-
-}
-
-
-
-window.onload=function(){
-
-let s=localStorage.getItem("session")
-
-if(s=="admin"){
-
-showAdmin()
-
-}else if(s){
-
-showDashboard()
-
-}
-
-}
-
-</script>
+<script src="script.js"></script>
 
 </body>
 </html>
