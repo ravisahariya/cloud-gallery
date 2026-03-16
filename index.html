@@ -4,10 +4,78 @@
 
 <title>Smart Document Locker</title>
 
-<link rel="stylesheet" href="style.css">
+<style>
 
-<link rel="stylesheet"
-href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.css"/>
+body{
+font-family:Arial;
+margin:0;
+background:#eef3ff;
+text-align:center;
+}
+
+header{
+background:#1565c0;
+color:white;
+padding:10px;
+display:flex;
+justify-content:space-between;
+align-items:center;
+}
+
+.logout{
+background:red;
+color:white;
+border:none;
+padding:8px;
+border-radius:5px;
+}
+
+.container{
+padding:20px;
+}
+
+input{
+padding:10px;
+margin:5px;
+}
+
+button{
+padding:10px;
+margin:5px;
+border:none;
+border-radius:5px;
+background:#1565c0;
+color:white;
+cursor:pointer;
+}
+
+.card{
+background:white;
+padding:10px;
+margin:15px auto;
+border-radius:10px;
+box-shadow:0 0 10px gray;
+max-width:400px;
+}
+
+img{
+width:100%;
+border-radius:8px;
+}
+
+.edit{
+background:orange;
+}
+
+.delete{
+background:red;
+}
+
+#loginPage{
+margin-top:100px;
+}
+
+</style>
 
 </head>
 
@@ -17,9 +85,9 @@ href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.css"/>
 
 <h2>Login</h2>
 
-<input id="username" placeholder="Username">
+<input id="username" placeholder="Username"><br>
 
-<input id="password" type="password" placeholder="Password">
+<input id="password" type="password" placeholder="Password"><br>
 
 <button onclick="login()">Login</button>
 
@@ -40,9 +108,9 @@ Smart Document Locker
 
 <input id="docname" placeholder="Document Name">
 
-<button onclick="openGallery()">Upload</button>
+<button onclick="openGallery()">Upload Photo</button>
 
-<input type="file" id="galleryInput" accept="image/*" style="display:none">
+<input type="file" id="galleryInput" accept="image/*" hidden>
 
 <hr>
 
@@ -53,28 +121,188 @@ Smart Document Locker
 </div>
 
 
-<div id="editorPage" style="display:none">
+<script>
 
-<h3>Edit Photo</h3>
+let docs = JSON.parse(localStorage.getItem("docs")) || []
 
-<img id="editorImage">
+function login(){
+
+let u=document.getElementById("username").value
+let p=document.getElementById("password").value
+
+if(u==="admin" && p==="1234"){
+
+document.getElementById("loginPage").style.display="none"
+document.getElementById("appPage").style.display="block"
+
+showDocs()
+
+}else{
+
+alert("Wrong username or password")
+
+}
+
+}
+
+function logout(){
+
+location.reload()
+
+}
+
+function openGallery(){
+
+document.getElementById("galleryInput").click()
+
+}
+
+document.getElementById("galleryInput").onchange=function(){
+
+let file=this.files[0]
+
+let reader=new FileReader()
+
+reader.onload=function(e){
+
+saveDoc(e.target.result)
+
+}
+
+reader.readAsDataURL(file)
+
+}
+
+function saveDoc(img){
+
+let name=document.getElementById("docname").value
+
+if(!name){
+
+alert("Document name likho")
+
+return
+
+}
+
+docs.push({
+
+name:name,
+img:img
+
+})
+
+localStorage.setItem("docs",JSON.stringify(docs))
+
+showDocs()
+
+}
+
+function showDocs(){
+
+let list=document.getElementById("list")
+
+list.innerHTML=""
+
+docs.forEach((d,i)=>{
+
+list.innerHTML+=`
+
+<div class="card">
+
+<h4>${d.name}</h4>
+
+<img src="${d.img}">
 
 <br>
 
-<button onclick="rotate()">Rotate</button>
+<button class="edit" onclick="renameDoc(${i})">Rename</button>
 
-<button onclick="applyFilter()">Filter</button>
+<button class="edit" onclick="cropDoc(${i})">Crop</button>
 
-<button onclick="saveEdit()">Save</button>
-
-<button onclick="closeEditor()">Cancel</button>
+<button class="delete" onclick="deleteDoc(${i})">Delete</button>
 
 </div>
 
+`
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.js"></script>
+})
 
-<script src="script.js"></script>
+}
+
+function renameDoc(i){
+
+let newName=prompt("New Name",docs[i].name)
+
+if(newName){
+
+docs[i].name=newName
+
+localStorage.setItem("docs",JSON.stringify(docs))
+
+showDocs()
+
+}
+
+}
+
+function cropDoc(i){
+
+let img=new Image()
+
+img.src=docs[i].img
+
+img.onload=function(){
+
+let canvas=document.createElement("canvas")
+
+let ctx=canvas.getContext("2d")
+
+let w=img.width*0.7
+let h=img.height*0.7
+
+canvas.width=w
+canvas.height=h
+
+ctx.drawImage(img,
+
+(img.width-w)/2,
+
+(img.height-h)/2,
+
+w,
+
+h,
+
+0,
+
+0,
+
+w,
+
+h)
+
+docs[i].img=canvas.toDataURL()
+
+localStorage.setItem("docs",JSON.stringify(docs))
+
+showDocs()
+
+}
+
+}
+
+function deleteDoc(i){
+
+docs.splice(i,1)
+
+localStorage.setItem("docs",JSON.stringify(docs))
+
+showDocs()
+
+}
+
+</script>
 
 </body>
 </html>
