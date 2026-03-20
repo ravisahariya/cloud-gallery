@@ -1,73 +1,77 @@
 <!DOCTYPE html>
 <html>
 <head>
-<title>Calculator</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Secure Vault</title>
 
 <style>
-body { margin:0; font-family:Arial; }
+body{margin:0;font-family:Arial;background:#111;color:#fff}
 
-/* CENTER LOGIN */
-#loginBox{
- height:100vh;
- display:flex;
- justify-content:center;
- align-items:center;
- background:#222;
+/* LOGIN */
+#login{
+height:100vh;
+display:flex;
+justify-content:center;
+align-items:center;
 }
 
-.login{
- background:white;
- padding:30px;
- border-radius:15px;
- width:300px;
- text-align:center;
+.box{
+background:#fff;
+color:#000;
+padding:25px;
+border-radius:15px;
+width:90%;
+max-width:350px;
+text-align:center;
 }
 
 input,select,button{
- width:100%;
- padding:12px;
- margin:6px 0;
- border-radius:8px;
- border:1px solid #ccc;
+width:100%;
+padding:12px;
+margin:6px 0;
+border-radius:8px;
+border:1px solid #ccc;
 }
 
-/* CALCULATOR */
+/* CALCULATOR PIN */
 #calc{
- display:none;
- height:100vh;
- background:#222;
- color:white;
- text-align:center;
+display:none;
+height:100vh;
+justify-content:center;
+align-items:center;
+flex-direction:column;
 }
 
 #display{
- width:90%;
- height:50px;
- margin:10px;
- text-align:right;
- font-size:20px;
+width:250px;
+height:50px;
+font-size:22px;
+text-align:right;
+margin-bottom:10px;
 }
 
-button.calcBtn{
- width:80px;
- height:60px;
- margin:5px;
- font-size:18px;
+.btn{
+width:70px;
+height:60px;
+margin:5px;
+font-size:18px;
 }
 
 /* VAULT */
 #vault{
- display:none;
- padding:15px;
- background:#f2f5f8;
- min-height:100vh;
+display:none;
+padding:10px;
+background:#f2f5f8;
+color:#000;
+min-height:100vh;
 }
 
 .card{
- background:white;
- padding:10px;
- border-radius:10px;
- margin:10px 0;
+background:#fff;
+padding:12px;
+border-radius:12px;
+margin:10px 0;
+box-shadow:0 2px 5px rgba(0,0,0,0.2);
 }
 </style>
 </head>
@@ -75,43 +79,42 @@ button.calcBtn{
 <body>
 
 <!-- LOGIN -->
-<div id="loginBox">
- <div class="login">
-  <h3>🔐 Login / Register</h3>
-  <input id="user" placeholder="Username">
-  <input id="pass" type="password" placeholder="Password">
-  <button onclick="register()">Register</button>
-  <button onclick="login()">Login</button>
- </div>
+<div id="login">
+<div class="box">
+<h3>🔐 Login / Register</h3>
+<input id="user" placeholder="Username">
+<input id="pass" type="password" placeholder="Password">
+<button onclick="register()">Register</button>
+<button onclick="login()">Login</button>
+</div>
 </div>
 
-<!-- CALCULATOR -->
+<!-- PIN -->
 <div id="calc">
- <h2>Calculator</h2>
- <input id="display" disabled>
+<input id="display" disabled>
 
- <br>
- <button class="calcBtn" onclick="press('1')">1</button>
- <button class="calcBtn" onclick="press('2')">2</button>
- <button class="calcBtn" onclick="press('3')">3</button><br>
+<div>
+<button class="btn" onclick="press('1')">1</button>
+<button class="btn" onclick="press('2')">2</button>
+<button class="btn" onclick="press('3')">3</button><br>
 
- <button class="calcBtn" onclick="press('4')">4</button>
- <button class="calcBtn" onclick="press('5')">5</button>
- <button class="calcBtn" onclick="press('6')">6</button><br>
+<button class="btn" onclick="press('4')">4</button>
+<button class="btn" onclick="press('5')">5</button>
+<button class="btn" onclick="press('6')">6</button><br>
 
- <button class="calcBtn" onclick="press('7')">7</button>
- <button class="calcBtn" onclick="press('8')">8</button>
- <button class="calcBtn" onclick="press('9')">9</button><br>
+<button class="btn" onclick="press('7')">7</button>
+<button class="btn" onclick="press('8')">8</button>
+<button class="btn" onclick="press('9')">9</button><br>
 
- <button class="calcBtn" onclick="press('0')">0</button>
- <button class="calcBtn" onclick="check()">=</button>
- <button class="calcBtn" onclick="clearD()">C</button>
+<button class="btn" onclick="press('0')">0</button>
+<button class="btn" onclick="check()">OK</button>
+<button class="btn" onclick="clearD()">C</button>
+</div>
 </div>
 
 <!-- VAULT -->
 <div id="vault">
 <h3>📂 My Vault</h3>
-
 <button onclick="logout()">🚪 Logout</button>
 
 <select id="category">
@@ -123,107 +126,111 @@ button.calcBtn{
 
 <input id="title" placeholder="Name">
 <input id="username" placeholder="Username">
-<input id="password" type="password" placeholder="Password">
+<input id="password" placeholder="Password">
 
 <button onclick="save()">Save</button>
 
 <input id="search" placeholder="Search..." onkeyup="show()">
 
-<ul id="list"></ul>
+<div id="list"></div>
 </div>
 
 <script>
+let secret="1234"; // CHANGE PIN
 let input="";
-let secret="1234";
+let data=JSON.parse(localStorage.getItem("vault"))||[];
 
-let data = JSON.parse(localStorage.getItem("vault"))||[];
-
-/* LOGIN SYSTEM */
+/* REGISTER */
 function register(){
- localStorage.setItem("user", user.value);
- localStorage.setItem("pass", pass.value);
- alert("Registered");
+localStorage.setItem("user",user.value);
+localStorage.setItem("pass",pass.value);
+alert("Registered");
 }
 
+/* LOGIN */
 function login(){
- if(user.value==localStorage.getItem("user") &&
-    pass.value==localStorage.getItem("pass")){
-  localStorage.setItem("login","yes");
-  showCalc();
- } else alert("Wrong");
+if(user.value==localStorage.getItem("user") &&
+pass.value==localStorage.getItem("pass")){
+localStorage.setItem("login","yes");
+showCalc();
+}else alert("Wrong login");
 }
 
 function showCalc(){
- loginBox.style.display="none";
- calc.style.display="block";
+login.style.display="none";
+calc.style.display="flex";
 }
 
+/* AUTO LOGIN */
 if(localStorage.getItem("login")=="yes"){
- showCalc();
+showCalc();
 }
 
-/* CALC */
+/* PIN */
 function press(n){
- input+=n;
- display.value=input;
+input+=n;
+display.value=input;
 }
 
 function clearD(){
- input="";
- display.value="";
+input="";
+display.value="";
 }
 
 function check(){
- if(input===secret){
-  calc.style.display="none";
-  vault.style.display="block";
-  show();
- } else {
-  try{ display.value=eval(input); }catch{}
- }
- input="";
+if(input===secret){
+calc.style.display="none";
+vault.style.display="block";
+show();
+}else{
+alert("Wrong PIN");
+}
+input="";
 }
 
-/* VAULT */
+/* SAVE */
 function save(){
- data.push({
-  t:title.value,
-  u:username.value,
-  p:password.value,
-  c:category.value
- });
- localStorage.setItem("vault",JSON.stringify(data));
- show();
+data.push({
+t:title.value,
+u:username.value,
+p:password.value,
+c:category.value
+});
+localStorage.setItem("vault",JSON.stringify(data));
+title.value="";username.value="";password.value="";
+show();
 }
 
+/* SHOW */
 function show(){
- list.innerHTML="";
- let s=search.value.toLowerCase();
+list.innerHTML="";
+let s=search.value.toLowerCase();
 
- data.forEach((d,i)=>{
-  if(d.t.toLowerCase().includes(s)){
-   list.innerHTML+=`
-   <div class="card">
-   <b>${d.t}</b> (${d.c})<br>
-   ${d.u}<br>
-   🔒 ******<br>
-   <button onclick="alert('${d.p}')">👁️</button>
-   <button onclick="del(${i})">❌</button>
-   </div>`;
-  }
- });
+data.forEach((d,i)=>{
+if(d.t.toLowerCase().includes(s)){
+list.innerHTML+=`
+<div class="card">
+<b>${d.t}</b> (${d.c})<br>
+${d.u}<br>
+🔒 ******<br>
+<button onclick="alert('${d.p}')">👁️</button>
+<button onclick="del(${i})">❌</button>
+</div>`;
+}
+});
 }
 
+/* DELETE */
 function del(i){
- data.splice(i,1);
- localStorage.setItem("vault",JSON.stringify(data));
- show();
+data.splice(i,1);
+localStorage.setItem("vault",JSON.stringify(data));
+show();
 }
 
 /* LOGOUT */
 function logout(){
- localStorage.removeItem("login");
- location.reload();
+localStorage.removeItem("login");
+location.reload();
 }
 </script>
 
