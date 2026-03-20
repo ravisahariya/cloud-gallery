@@ -2,32 +2,29 @@
 <html>
 <head>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Secure Vault</title>
 
 <style>
-body{margin:0;font-family:Arial;background:#111}
-
-/* CENTER BOX */
-.center{
-height:100vh;
-display:flex;
-justify-content:center;
-align-items:center;
+body{
+margin:0;
+font-family:Arial;
+background:#eef2f7;
 }
 
-/* LOGIN */
-#loginBox{background:#111;}
-.box{
-background:white;
-padding:25px;
-border-radius:15px;
-width:90%;
-max-width:350px;
+/* HEADER */
+.header{
+background:#2c3e50;
+color:white;
+padding:12px;
 text-align:center;
+font-size:18px;
 }
 
-/* INPUT */
-input,button,select{
+/* FORM */
+.box{
+padding:10px;
+}
+
+input,select,button{
 width:100%;
 padding:12px;
 margin:6px 0;
@@ -35,87 +32,39 @@ border-radius:8px;
 border:1px solid #ccc;
 }
 
-/* PIN */
-#pinBox{
-display:none;
-background:#111;
-flex-direction:column;
-align-items:center;
-}
-
-#display{
-width:250px;
-height:50px;
-margin-bottom:10px;
-font-size:22px;
-text-align:right;
-}
-
-.btn{
-width:70px;
-height:60px;
-margin:5px;
-font-size:18px;
-}
-
-/* VAULT */
-#vault{
-display:none;
-background:#f2f5f8;
-min-height:100vh;
-padding:10px;
-}
-
+/* CARD */
 .card{
 background:white;
-padding:12px;
 border-radius:12px;
+padding:12px;
 margin:10px 0;
+box-shadow:0 3px 8px rgba(0,0,0,0.2);
+}
+
+/* BUTTON ROW */
+.row{
+display:flex;
+gap:5px;
+}
+
+.row button{
+flex:1;
+}
+
+/* PASSWORD TEXT */
+.pass{
+color:#888;
+letter-spacing:2px;
 }
 </style>
 </head>
 
 <body>
 
-<!-- LOGIN -->
-<div id="loginBox" class="center">
+<div class="header">📂 My Secure Vault</div>
+
 <div class="box">
-<h3>🔐 Login / Register</h3>
-<input id="user" placeholder="Username">
-<input id="pass" type="password" placeholder="Password">
-<button onclick="register()">Register</button>
-<button onclick="login()">Login</button>
-</div>
-</div>
 
-<!-- PIN -->
-<div id="pinBox" class="center">
-<div>
-<input id="display" disabled>
-
-<div>
-<button class="btn" onclick="press('1')">1</button>
-<button class="btn" onclick="press('2')">2</button>
-<button class="btn" onclick="press('3')">3</button><br>
-
-<button class="btn" onclick="press('4')">4</button>
-<button class="btn" onclick="press('5')">5</button>
-<button class="btn" onclick="press('6')">6</button><br>
-
-<button class="btn" onclick="press('7')">7</button>
-<button class="btn" onclick="press('8')">8</button>
-<button class="btn" onclick="press('9')">9</button><br>
-
-<button class="btn" onclick="press('0')">0</button>
-<button class="btn" onclick="check()">OK</button>
-<button class="btn" onclick="clearD()">C</button>
-</div>
-</div>
-</div>
-
-<!-- VAULT -->
-<div id="vault">
-<h3>📂 My Vault</h3>
 <button onclick="logout()">🚪 Logout</button>
 
 <select id="category">
@@ -129,99 +78,89 @@ margin:10px 0;
 <input id="username" placeholder="Username">
 <input id="password" placeholder="Password">
 
-<button onclick="save()">Save</button>
+<button onclick="save()">💾 Save</button>
 
-<input id="search" placeholder="Search..." onkeyup="show()">
+<input id="search" placeholder="🔍 Search..." onkeyup="show()">
 
 <div id="list"></div>
+
 </div>
 
 <script>
-let secret="1234";
-let input="";
-let data=JSON.parse(localStorage.getItem("vault"))||[];
-
-/* REGISTER */
-function register(){
-localStorage.setItem("user",user.value);
-localStorage.setItem("pass",pass.value);
-alert("Registered Successfully");
-}
-
-/* LOGIN */
-function login(){
-if(user.value==localStorage.getItem("user") &&
-pass.value==localStorage.getItem("pass")){
-localStorage.setItem("login","yes");
-showPin();
-}else alert("Wrong Login");
-}
-
-/* AUTO LOGIN */
-if(localStorage.getItem("login")=="yes"){
-showPin();
-}
-
-function showPin(){
-loginBox.style.display="none";
-pinBox.style.display="flex";
-}
-
-/* PIN */
-function press(n){
-input+=n;
-display.value=input;
-}
-
-function clearD(){
-input="";
-display.value="";
-}
-
-function check(){
-if(input===secret){
-pinBox.style.display="none";
-vault.style.display="block";
-show();
-}else{
-alert("Wrong PIN");
-}
-input="";
-}
+let data = JSON.parse(localStorage.getItem("vault")) || [];
+let editIndex = -1;
 
 /* SAVE */
 function save(){
 if(title.value=="") return alert("Enter Name");
 
-data.push({
+let obj = {
 t:title.value,
 u:username.value,
 p:password.value,
 c:category.value
-});
+};
+
+if(editIndex==-1){
+data.push(obj);
+}else{
+data[editIndex]=obj;
+editIndex=-1;
+}
 
 localStorage.setItem("vault",JSON.stringify(data));
-title.value="";username.value="";password.value="";
+
+title.value="";
+username.value="";
+password.value="";
+
 show();
 }
 
 /* SHOW */
 function show(){
 list.innerHTML="";
-let s=search.value.toLowerCase();
+let s = search.value.toLowerCase();
 
 data.forEach((d,i)=>{
-if(d.t.toLowerCase().includes(s)){
+if((d.t||"").toLowerCase().includes(s)){
+
 list.innerHTML+=`
 <div class="card">
 <b>${d.t}</b> (${d.c})<br>
 ${d.u}<br>
-🔒 ******<br>
-<button onclick="alert('${d.p}')">👁️</button>
+
+<div class="pass" id="p${i}">🔒 ******</div>
+
+<div class="row">
+<button onclick="toggle(${i})">👁️</button>
+<button onclick="edit(${i})">✏️</button>
 <button onclick="del(${i})">❌</button>
-</div>`;
+</div>
+</div>
+`;
 }
 });
+}
+
+/* SHOW PASSWORD */
+function toggle(i){
+let el=document.getElementById("p"+i);
+if(el.innerText.includes("*")){
+el.innerText=data[i].p;
+}else{
+el.innerText="🔒 ******";
+}
+}
+
+/* EDIT */
+function edit(i){
+let d=data[i];
+title.value=d.t;
+username.value=d.u;
+password.value=d.p;
+category.value=d.c;
+editIndex=i;
 }
 
 /* DELETE */
@@ -236,6 +175,8 @@ function logout(){
 localStorage.removeItem("login");
 location.reload();
 }
+
+show();
 </script>
 
 </body>
