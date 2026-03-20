@@ -1,307 +1,181 @@
 <!DOCTYPE html>
 <html>
 <head>
-
-<title>Smart Document Locker</title>
-
+<title>Calculator</title>
 <style>
+body { font-family: Arial; background:#222; color:white; text-align:center; }
 
-body{
-font-family:Arial;
-margin:0;
-background:#eef3ff;
-text-align:center;
-}
+#calc { width:300px; margin:30px auto; }
+button { width:70px; height:50px; margin:5px; font-size:18px; }
 
-header{
-background:#1565c0;
-color:white;
-padding:10px;
-display:flex;
-justify-content:space-between;
-align-items:center;
-}
+#display { width:90%; height:40px; margin:10px; text-align:right; padding:5px; }
 
-.logout{
-background:red;
-color:white;
-border:none;
-padding:8px;
-border-radius:5px;
-}
+#vault { display:none; background:#f0f4f8; color:black; padding:15px; border-radius:10px; }
 
-.container{
-padding:20px;
-}
-
-input{
-padding:10px;
-margin:5px;
-}
-
-button{
-padding:10px;
-margin:5px;
-border:none;
-border-radius:5px;
-background:#1565c0;
-color:white;
-cursor:pointer;
-}
-
-.card{
-background:white;
-padding:10px;
-margin:15px auto;
-border-radius:10px;
-box-shadow:0 0 10px gray;
-max-width:400px;
-}
-
-img{
-width:100%;
-border-radius:8px;
-}
-
-.edit{
-background:orange;
-}
-
-.delete{
-background:red;
-}
-
-#loginPage{
-margin-top:100px;
-}
-
+input, select { width:90%; margin:5px; padding:8px; }
 </style>
-
 </head>
 
 <body>
 
-<div id="loginPage">
-
-<h2>Login</h2>
-
-<input id="username" placeholder="Username"><br>
-
-<input id="password" type="password" placeholder="Password"><br>
-
-<button onclick="login()">Login</button>
-
-</div>
-
-
-<div id="appPage" style="display:none">
-
-<header>
-
-Smart Document Locker
-
-<button class="logout" onclick="logout()">Logout</button>
-
-</header>
-
-<div class="container">
-
-<input id="docname" placeholder="Document Name">
-
-<button onclick="openGallery()">Upload Photo</button>
-
-<input type="file" id="galleryInput" accept="image/*" hidden>
-
-<hr>
-
-<div id="list"></div>
-
-</div>
-
-</div>
-
-
-<script>
-
-let docs = JSON.parse(localStorage.getItem("docs")) || []
-
-function login(){
-
-let u=document.getElementById("username").value
-let p=document.getElementById("password").value
-
-if(u==="admin" && p==="1234"){
-
-document.getElementById("loginPage").style.display="none"
-document.getElementById("appPage").style.display="block"
-
-showDocs()
-
-}else{
-
-alert("Wrong username or password")
-
-}
-
-}
-
-function logout(){
-
-location.reload()
-
-}
-
-function openGallery(){
-
-document.getElementById("galleryInput").click()
-
-}
-
-document.getElementById("galleryInput").onchange=function(){
-
-let file=this.files[0]
-
-let reader=new FileReader()
-
-reader.onload=function(e){
-
-saveDoc(e.target.result)
-
-}
-
-reader.readAsDataURL(file)
-
-}
-
-function saveDoc(img){
-
-let name=document.getElementById("docname").value
-
-if(!name){
-
-alert("Document name likho")
-
-return
-
-}
-
-docs.push({
-
-name:name,
-img:img
-
-})
-
-localStorage.setItem("docs",JSON.stringify(docs))
-
-showDocs()
-
-}
-
-function showDocs(){
-
-let list=document.getElementById("list")
-
-list.innerHTML=""
-
-docs.forEach((d,i)=>{
-
-list.innerHTML+=`
-
-<div class="card">
-
-<h4>${d.name}</h4>
-
-<img src="${d.img}">
+<!-- Calculator -->
+<div id="calc">
+<h2>Calculator</h2>
+<input id="display" disabled>
 
 <br>
+<button onclick="press('1')">1</button>
+<button onclick="press('2')">2</button>
+<button onclick="press('3')">3</button><br>
 
-<button class="edit" onclick="renameDoc(${i})">Rename</button>
+<button onclick="press('4')">4</button>
+<button onclick="press('5')">5</button>
+<button onclick="press('6')">6</button><br>
 
-<button class="edit" onclick="cropDoc(${i})">Crop</button>
+<button onclick="press('7')">7</button>
+<button onclick="press('8')">8</button>
+<button onclick="press('9')">9</button><br>
 
-<button class="delete" onclick="deleteDoc(${i})">Delete</button>
-
+<button onclick="press('0')">0</button>
+<button onclick="check()">=</button>
+<button onclick="clearD()">C</button>
 </div>
 
-`
+<!-- Vault -->
+<div id="vault">
+<h3>🔐 My Vault</h3>
 
-})
+<select id="category">
+<option>Bank</option>
+<option>ID</option>
+<option>Apps</option>
+<option>Email</option>
+</select>
 
+<input type="text" id="title" placeholder="Name">
+<input type="text" id="username" placeholder="Username">
+<input type="password" id="password" placeholder="Password">
+
+<button onclick="save()">Save</button>
+<button onclick="backup()">📤 Backup</button>
+<input type="file" onchange="restore(event)">
+
+<input type="text" id="search" placeholder="Search..." onkeyup="show()">
+
+<ul id="list"></ul>
+</div>
+
+<script>
+let secret = "1234"; // CHANGE PIN
+let input = "";
+
+let data = JSON.parse(localStorage.getItem("vault")) || [];
+let editIndex = -1;
+
+function press(n){
+ input += n;
+ document.getElementById("display").value = input;
 }
 
-function renameDoc(i){
-
-let newName=prompt("New Name",docs[i].name)
-
-if(newName){
-
-docs[i].name=newName
-
-localStorage.setItem("docs",JSON.stringify(docs))
-
-showDocs()
-
+function clearD(){
+ input="";
+ document.getElementById("display").value="";
 }
 
+function check(){
+ if(input === secret){
+  document.getElementById("calc").style.display="none";
+  document.getElementById("vault").style.display="block";
+  show();
+ } else {
+  try{
+   document.getElementById("display").value = eval(input);
+  }catch{
+   alert("Error");
+  }
+ }
+ input="";
 }
 
-function cropDoc(i){
+function save(){
+ let cat = category.value;
+ let t = title.value;
+ let u = username.value;
+ let p = password.value;
 
-let img=new Image()
+ if(editIndex==-1){
+  data.push({cat,t,u,p});
+ } else {
+  data[editIndex] = {cat,t,u,p};
+  editIndex=-1;
+ }
 
-img.src=docs[i].img
-
-img.onload=function(){
-
-let canvas=document.createElement("canvas")
-
-let ctx=canvas.getContext("2d")
-
-let w=img.width*0.7
-let h=img.height*0.7
-
-canvas.width=w
-canvas.height=h
-
-ctx.drawImage(img,
-
-(img.width-w)/2,
-
-(img.height-h)/2,
-
-w,
-
-h,
-
-0,
-
-0,
-
-w,
-
-h)
-
-docs[i].img=canvas.toDataURL()
-
-localStorage.setItem("docs",JSON.stringify(docs))
-
-showDocs()
-
+ localStorage.setItem("vault", JSON.stringify(data));
+ clearFields();
+ show();
 }
 
+function edit(i){
+ let d = data[i];
+ category.value = d.cat;
+ title.value = d.t;
+ username.value = d.u;
+ password.value = d.p;
+ editIndex = i;
 }
 
-function deleteDoc(i){
-
-docs.splice(i,1)
-
-localStorage.setItem("docs",JSON.stringify(docs))
-
-showDocs()
-
+function del(i){
+ data.splice(i,1);
+ localStorage.setItem("vault", JSON.stringify(data));
+ show();
 }
 
+function show(){
+ let list = document.getElementById("list");
+ let s = search.value.toLowerCase();
+ list.innerHTML="";
+
+ data.forEach((d,i)=>{
+  if(d.t.toLowerCase().includes(s)){
+   list.innerHTML += `
+   <li>
+   <b>${d.t}</b> (${d.cat})<br>
+   ${d.u}<br>
+   🔒 ********<br>
+   <button onclick="alert('${d.p}')">👁️</button>
+   <button onclick="edit(${i})">✏️</button>
+   <button onclick="del(${i})">❌</button>
+   </li>`;
+  }
+ });
+}
+
+function clearFields(){
+ title.value="";
+ username.value="";
+ password.value="";
+}
+
+function backup(){
+ let blob = new Blob([JSON.stringify(data)], {type:"application/json"});
+ let a = document.createElement("a");
+ a.href = URL.createObjectURL(blob);
+ a.download = "vault_backup.json";
+ a.click();
+}
+
+function restore(e){
+ let file = e.target.files[0];
+ let reader = new FileReader();
+
+ reader.onload = function(ev){
+  data = JSON.parse(ev.target.result);
+  localStorage.setItem("vault", JSON.stringify(data));
+  show();
+ };
+
+ reader.readAsText(file);
+}
 </script>
 
 </body>
