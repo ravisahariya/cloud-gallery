@@ -2,48 +2,117 @@
 <html>
 <head>
 <title>Calculator</title>
+
 <style>
-body { font-family: Arial; background:#222; color:white; text-align:center; }
+body { margin:0; font-family:Arial; }
 
-#calc { width:300px; margin:30px auto; }
-button { width:70px; height:50px; margin:5px; font-size:18px; }
+/* CENTER LOGIN */
+#loginBox{
+ height:100vh;
+ display:flex;
+ justify-content:center;
+ align-items:center;
+ background:#222;
+}
 
-#display { width:90%; height:40px; margin:10px; text-align:right; padding:5px; }
+.login{
+ background:white;
+ padding:30px;
+ border-radius:15px;
+ width:300px;
+ text-align:center;
+}
 
-#vault { display:none; background:#f0f4f8; color:black; padding:15px; border-radius:10px; }
+input,select,button{
+ width:100%;
+ padding:12px;
+ margin:6px 0;
+ border-radius:8px;
+ border:1px solid #ccc;
+}
 
-input, select { width:90%; margin:5px; padding:8px; }
+/* CALCULATOR */
+#calc{
+ display:none;
+ height:100vh;
+ background:#222;
+ color:white;
+ text-align:center;
+}
+
+#display{
+ width:90%;
+ height:50px;
+ margin:10px;
+ text-align:right;
+ font-size:20px;
+}
+
+button.calcBtn{
+ width:80px;
+ height:60px;
+ margin:5px;
+ font-size:18px;
+}
+
+/* VAULT */
+#vault{
+ display:none;
+ padding:15px;
+ background:#f2f5f8;
+ min-height:100vh;
+}
+
+.card{
+ background:white;
+ padding:10px;
+ border-radius:10px;
+ margin:10px 0;
+}
 </style>
 </head>
 
 <body>
 
-<!-- Calculator -->
-<div id="calc">
-<h2>Calculator</h2>
-<input id="display" disabled>
-
-<br>
-<button onclick="press('1')">1</button>
-<button onclick="press('2')">2</button>
-<button onclick="press('3')">3</button><br>
-
-<button onclick="press('4')">4</button>
-<button onclick="press('5')">5</button>
-<button onclick="press('6')">6</button><br>
-
-<button onclick="press('7')">7</button>
-<button onclick="press('8')">8</button>
-<button onclick="press('9')">9</button><br>
-
-<button onclick="press('0')">0</button>
-<button onclick="check()">=</button>
-<button onclick="clearD()">C</button>
+<!-- LOGIN -->
+<div id="loginBox">
+ <div class="login">
+  <h3>🔐 Login / Register</h3>
+  <input id="user" placeholder="Username">
+  <input id="pass" type="password" placeholder="Password">
+  <button onclick="register()">Register</button>
+  <button onclick="login()">Login</button>
+ </div>
 </div>
 
-<!-- Vault -->
+<!-- CALCULATOR -->
+<div id="calc">
+ <h2>Calculator</h2>
+ <input id="display" disabled>
+
+ <br>
+ <button class="calcBtn" onclick="press('1')">1</button>
+ <button class="calcBtn" onclick="press('2')">2</button>
+ <button class="calcBtn" onclick="press('3')">3</button><br>
+
+ <button class="calcBtn" onclick="press('4')">4</button>
+ <button class="calcBtn" onclick="press('5')">5</button>
+ <button class="calcBtn" onclick="press('6')">6</button><br>
+
+ <button class="calcBtn" onclick="press('7')">7</button>
+ <button class="calcBtn" onclick="press('8')">8</button>
+ <button class="calcBtn" onclick="press('9')">9</button><br>
+
+ <button class="calcBtn" onclick="press('0')">0</button>
+ <button class="calcBtn" onclick="check()">=</button>
+ <button class="calcBtn" onclick="clearD()">C</button>
+</div>
+
+<!-- VAULT -->
 <div id="vault">
-<h3>🔐 My Vault</h3>
+<h3>📂 My Vault</h3>
+
+<button onclick="logout()">🚪 Logout</button>
 
 <select id="category">
 <option>Bank</option>
@@ -52,129 +121,109 @@ input, select { width:90%; margin:5px; padding:8px; }
 <option>Email</option>
 </select>
 
-<input type="text" id="title" placeholder="Name">
-<input type="text" id="username" placeholder="Username">
-<input type="password" id="password" placeholder="Password">
+<input id="title" placeholder="Name">
+<input id="username" placeholder="Username">
+<input id="password" type="password" placeholder="Password">
 
 <button onclick="save()">Save</button>
-<button onclick="backup()">📤 Backup</button>
-<input type="file" onchange="restore(event)">
 
-<input type="text" id="search" placeholder="Search..." onkeyup="show()">
+<input id="search" placeholder="Search..." onkeyup="show()">
 
 <ul id="list"></ul>
 </div>
 
 <script>
-let secret = "1234"; // CHANGE PIN
-let input = "";
+let input="";
+let secret="1234";
 
-let data = JSON.parse(localStorage.getItem("vault")) || [];
-let editIndex = -1;
+let data = JSON.parse(localStorage.getItem("vault"))||[];
 
+/* LOGIN SYSTEM */
+function register(){
+ localStorage.setItem("user", user.value);
+ localStorage.setItem("pass", pass.value);
+ alert("Registered");
+}
+
+function login(){
+ if(user.value==localStorage.getItem("user") &&
+    pass.value==localStorage.getItem("pass")){
+  localStorage.setItem("login","yes");
+  showCalc();
+ } else alert("Wrong");
+}
+
+function showCalc(){
+ loginBox.style.display="none";
+ calc.style.display="block";
+}
+
+if(localStorage.getItem("login")=="yes"){
+ showCalc();
+}
+
+/* CALC */
 function press(n){
- input += n;
- document.getElementById("display").value = input;
+ input+=n;
+ display.value=input;
 }
 
 function clearD(){
  input="";
- document.getElementById("display").value="";
+ display.value="";
 }
 
 function check(){
- if(input === secret){
-  document.getElementById("calc").style.display="none";
-  document.getElementById("vault").style.display="block";
+ if(input===secret){
+  calc.style.display="none";
+  vault.style.display="block";
   show();
  } else {
-  try{
-   document.getElementById("display").value = eval(input);
-  }catch{
-   alert("Error");
-  }
+  try{ display.value=eval(input); }catch{}
  }
  input="";
 }
 
+/* VAULT */
 function save(){
- let cat = category.value;
- let t = title.value;
- let u = username.value;
- let p = password.value;
-
- if(editIndex==-1){
-  data.push({cat,t,u,p});
- } else {
-  data[editIndex] = {cat,t,u,p};
-  editIndex=-1;
- }
-
- localStorage.setItem("vault", JSON.stringify(data));
- clearFields();
- show();
-}
-
-function edit(i){
- let d = data[i];
- category.value = d.cat;
- title.value = d.t;
- username.value = d.u;
- password.value = d.p;
- editIndex = i;
-}
-
-function del(i){
- data.splice(i,1);
- localStorage.setItem("vault", JSON.stringify(data));
+ data.push({
+  t:title.value,
+  u:username.value,
+  p:password.value,
+  c:category.value
+ });
+ localStorage.setItem("vault",JSON.stringify(data));
  show();
 }
 
 function show(){
- let list = document.getElementById("list");
- let s = search.value.toLowerCase();
  list.innerHTML="";
+ let s=search.value.toLowerCase();
 
  data.forEach((d,i)=>{
   if(d.t.toLowerCase().includes(s)){
-   list.innerHTML += `
-   <li>
-   <b>${d.t}</b> (${d.cat})<br>
+   list.innerHTML+=`
+   <div class="card">
+   <b>${d.t}</b> (${d.c})<br>
    ${d.u}<br>
-   🔒 ********<br>
+   🔒 ******<br>
    <button onclick="alert('${d.p}')">👁️</button>
-   <button onclick="edit(${i})">✏️</button>
    <button onclick="del(${i})">❌</button>
-   </li>`;
+   </div>`;
   }
  });
 }
 
-function clearFields(){
- title.value="";
- username.value="";
- password.value="";
+function del(i){
+ data.splice(i,1);
+ localStorage.setItem("vault",JSON.stringify(data));
+ show();
 }
 
-function backup(){
- let blob = new Blob([JSON.stringify(data)], {type:"application/json"});
- let a = document.createElement("a");
- a.href = URL.createObjectURL(blob);
- a.download = "vault_backup.json";
- a.click();
-}
-
-function restore(e){
- let file = e.target.files[0];
- let reader = new FileReader();
-
- reader.onload = function(ev){
-  data = JSON.parse(ev.target.result);
-  localStorage.setItem("vault", JSON.stringify(data));
-  show();
- };
-
- reader.readAsText(file);
+/* LOGOUT */
+function logout(){
+ localStorage.removeItem("login");
+ location.reload();
 }
 </script>
 
