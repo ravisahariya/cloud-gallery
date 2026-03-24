@@ -12,7 +12,7 @@ body{
     text-align:center;
 }
 
-/* FORM BIG */
+/* FORM */
 input, select{
     padding:12px;
     margin:6px;
@@ -23,48 +23,19 @@ input, select{
 
 button{
     padding:10px 18px;
-    margin:8px;
+    margin:5px;
     font-size:15px;
     background:#800000;
     color:white;
     border:none;
 }
 
-/* PASS WRAPPER (holes ke liye) */
+/* WRAPPER */
 .wrapper{
-    position:relative;
     width:95%;
     max-width:900px;
     margin:20px auto;
 }
-
-/* HOLES */
-.hole{
-    width:14px;
-    height:14px;
-    background:#eaeaea;
-    border-radius:50%;
-    position:absolute;
-    left:-8px;
-}
-
-.hole.right{
-    left:auto;
-    right:-8px;
-}
-
-/* vertical holes */
-.hole1{top:20px;}
-.hole2{top:80px;}
-.hole3{top:140px;}
-.hole4{top:200px;}
-.hole5{top:260px;}
-
-.hole6{top:20px;}
-.hole7{top:80px;}
-.hole8{top:140px;}
-.hole9{top:200px;}
-.hole10{top:260px;}
 
 /* PASS */
 .pass{
@@ -81,7 +52,7 @@ button{
 }
 
 .title{
-    font-size:22px;
+    font-size:20px;
     font-weight:bold;
     color:#800000;
 }
@@ -103,6 +74,16 @@ button{
     display:flex;
     justify-content:space-between;
     margin-top:20px;
+}
+
+/* BUTTON AREA */
+.btns{
+    margin-top:8px;
+}
+
+/* DOWNLOAD में button hide */
+.hide{
+    display:none;
 }
 
 /* MOBILE */
@@ -194,23 +175,9 @@ let html="";
 dataList.forEach(d=>{
 
 html+=`
-<div class="wrapper" id="pass${d.id}">
+<div class="wrapper">
 
-<!-- LEFT HOLES -->
-<div class="hole hole1"></div>
-<div class="hole hole2"></div>
-<div class="hole hole3"></div>
-<div class="hole hole4"></div>
-<div class="hole hole5"></div>
-
-<!-- RIGHT HOLES -->
-<div class="hole right hole6"></div>
-<div class="hole right hole7"></div>
-<div class="hole right hole8"></div>
-<div class="hole right hole9"></div>
-<div class="hole right hole10"></div>
-
-<div class="pass">
+<div class="pass" id="pass${d.id}">
 
 <div class="header">
 <div class="title">Arvind Limited</div>
@@ -246,10 +213,13 @@ Total Person: ${d.person}
 <div>Sign (Authority)</div>
 </div>
 
+</div>
+
+<div class="btns">
 <button onclick="downloadImage('pass${d.id}')">Download</button>
 <button onclick="edit(${d.id})">Edit</button>
-
 </div>
+
 </div>
 `;
 });
@@ -257,7 +227,9 @@ list.innerHTML=html;
 }
 
 function downloadImage(id){
-html2canvas(document.getElementById(id)).then(canvas=>{
+let el=document.getElementById(id);
+
+html2canvas(el).then(canvas=>{
 let link=document.createElement("a");
 link.download="gatepass.png";
 link.href=canvas.toDataURL();
