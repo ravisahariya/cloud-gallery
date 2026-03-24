@@ -1,182 +1,223 @@
 <!DOCTYPE html>
 <html>
 <head>
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta charset="UTF-8">
+<title>Gate Pass System</title>
 
 <style>
-body{
-margin:0;
-font-family:Arial;
-background:#eef2f7;
+body {
+    font-family: Arial;
+    background: #f2f2f2;
+    text-align: center;
 }
 
-/* HEADER */
-.header{
-background:#2c3e50;
-color:white;
-padding:12px;
-text-align:center;
-font-size:18px;
+input, select {
+    padding: 8px;
+    margin: 5px;
+    width: 230px;
 }
 
-/* FORM */
-.box{
-padding:10px;
+button {
+    padding: 8px 15px;
+    margin: 5px;
 }
 
-input,select,button{
-width:100%;
-padding:12px;
-margin:6px 0;
-border-radius:8px;
-border:1px solid #ccc;
+/* PASS DESIGN */
+.pass {
+    width: 95%;
+    max-width: 900px;
+    margin: 10px auto;
+    background: white;
+    border: 3px double #000;
+    padding: 15px;
+    text-align: left;
 }
 
-/* CARD */
-.card{
-background:white;
-border-radius:12px;
-padding:12px;
-margin:10px 0;
-box-shadow:0 3px 8px rgba(0,0,0,0.2);
+.title {
+    font-size: 20px;
+    font-weight: bold;
 }
 
-/* BUTTON ROW */
-.row{
-display:flex;
-gap:5px;
+.row {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 10px;
 }
 
-.row button{
-flex:1;
+.left, .right {
+    width: 48%;
+    font-size: 14px;
+    line-height: 1.6;
 }
 
-/* PASSWORD TEXT */
-.pass{
-color:#888;
-letter-spacing:2px;
+.sign {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 25px;
+}
+
+@media print {
+    body * { visibility: hidden; }
+    .printable, .printable * { visibility: visible; }
 }
 </style>
+
 </head>
 
 <body>
 
-<div class="header">📂 My Secure Vault</div>
+<h3>Gate Pass Entry Form</h3>
 
-<div class="box">
+<input id="date" placeholder="Date"><br>
+<input id="transporter" placeholder="Transporter"><br>
+<input id="from" placeholder="From"><br>
+<input id="driver" placeholder="Driver Name"><br>
+<input id="vehicle" placeholder="Vehicle No"><br>
 
-<button onclick="logout()">🚪 Logout</button>
+<input id="goods" placeholder="Goods Type"><br>
+<input id="dept" placeholder="Department"><br>
+<input id="personMeet" placeholder="Person Meet"><br>
 
-<select id="category">
-<option>Bank</option>
-<option>ID</option>
-<option>Apps</option>
-<option>Email</option>
-</select>
+<select id="dvr"><option>DVR</option><option>1</option><option>0</option></select>
+<select id="ldr"><option>LDR</option><option>1</option><option>0</option></select>
+<select id="clr"><option>CLR</option><option>1</option><option>0</option></select>
+<select id="oep"><option>OEP</option><option>1</option><option>0</option></select><br>
 
-<input id="title" placeholder="Name">
-<input id="username" placeholder="Username">
-<input id="password" placeholder="Password">
+<input id="person" placeholder="Total Person"><br>
 
-<button onclick="save()">💾 Save</button>
+<select id="type">
+<option>External</option>
+<option>Internal</option>
+</select><br>
 
-<input id="search" placeholder="🔍 Search..." onkeyup="show()">
+<button onclick="save()">Save</button>
+
+<hr>
 
 <div id="list"></div>
 
-</div>
-
 <script>
-let data = JSON.parse(localStorage.getItem("vault")) || [];
-let editIndex = -1;
 
-/* SAVE */
+let entryNo = localStorage.getItem("entryNo") || 2604118000;
+let dataList = JSON.parse(localStorage.getItem("dataList")) || [];
+
 function save(){
-if(title.value=="") return alert("Enter Name");
+entryNo++;
+localStorage.setItem("entryNo", entryNo);
 
-let obj = {
-t:title.value,
-u:username.value,
-p:password.value,
-c:category.value
+let data = {
+id: Date.now(),
+date: date.value,
+transporter: transporter.value,
+from: from.value,
+driver: driver.value,
+vehicle: vehicle.value,
+goods: goods.value,
+dept: dept.value,
+personMeet: personMeet.value,
+dvr: dvr.value,
+ldr: ldr.value,
+clr: clr.value,
+oep: oep.value,
+person: person.value,
+type: type.value,
+time: new Date().toLocaleTimeString(),
+entryNo: entryNo
 };
 
-if(editIndex==-1){
-data.push(obj);
-}else{
-data[editIndex]=obj;
-editIndex=-1;
-}
+dataList.push(data);
+localStorage.setItem("dataList", JSON.stringify(dataList));
 
-localStorage.setItem("vault",JSON.stringify(data));
-
-title.value="";
-username.value="";
-password.value="";
-
+clearForm();
 show();
 }
 
-/* SHOW */
+function clearForm(){
+document.querySelectorAll("input").forEach(i=>i.value="");
+document.querySelectorAll("select").forEach(s=>s.selectedIndex=0);
+}
+
 function show(){
-list.innerHTML="";
-let s = search.value.toLowerCase();
+let html = "";
 
-data.forEach((d,i)=>{
-if((d.t||"").toLowerCase().includes(s)){
+dataList.forEach(d => {
 
-list.innerHTML+=`
-<div class="card">
-<b>${d.t}</b> (${d.c})<br>
-${d.u}<br>
+html += `
+<div class="pass printable">
 
-<div class="pass" id="p${i}">🔒 ******</div>
+<div class="title">Arvind Limited</div>
 
 <div class="row">
-<button onclick="toggle(${i})">👁️</button>
-<button onclick="edit(${i})">✏️</button>
-<button onclick="del(${i})">❌</button>
+<div class="left">
+<b>Date:</b> ${d.date}<br>
+<b>Transporter:</b> ${d.transporter}<br>
+<b>From:</b> ${d.from}<br>
+<b>Driver:</b> ${d.driver}<br>
+<b>Vehicle No:</b> ${d.vehicle}<br>
+<b>Goods Type:</b> ${d.goods}<br>
+<b>Department:</b> ${d.dept}<br>
+<b>Person Meet:</b> ${d.personMeet}
 </div>
+
+<div class="right">
+<b>Vehicle Entry No:</b> ${d.entryNo}<br>
+<b>In Time:</b> ${d.time}<br>
+<b>Veh Ent Type:</b> ${d.type}<br>
+<b>DVR:</b> ${d.dvr}<br>
+<b>LDR:</b> ${d.ldr}<br>
+<b>CLR:</b> ${d.clr}<br>
+<b>OEP:</b> ${d.oep}<br>
+<b>Total Person:</b> ${d.person}
+</div>
+</div>
+
+<div class="sign">
+<div>Sign (Transporter)</div>
+<div>Sign (Authority)</div>
+</div>
+
+<button onclick="edit(${d.id})">Edit</button>
+<button onclick="download(this)">Download</button>
+
 </div>
 `;
-}
 });
+
+document.getElementById("list").innerHTML = html;
 }
 
-/* SHOW PASSWORD */
-function toggle(i){
-let el=document.getElementById("p"+i);
-if(el.innerText.includes("*")){
-el.innerText=data[i].p;
-}else{
-el.innerText="🔒 ******";
-}
-}
+function edit(id){
+let d = dataList.find(x=>x.id==id);
 
-/* EDIT */
-function edit(i){
-let d=data[i];
-title.value=d.t;
-username.value=d.u;
-password.value=d.p;
-category.value=d.c;
-editIndex=i;
-}
+date.value = d.date;
+transporter.value = d.transporter;
+from.value = d.from;
+driver.value = d.driver;
+vehicle.value = d.vehicle;
+goods.value = d.goods;
+dept.value = d.dept;
+personMeet.value = d.personMeet;
+dvr.value = d.dvr;
+ldr.value = d.ldr;
+clr.value = d.clr;
+oep.value = d.oep;
+person.value = d.person;
+type.value = d.type;
 
-/* DELETE */
-function del(i){
-data.splice(i,1);
-localStorage.setItem("vault",JSON.stringify(data));
+dataList = dataList.filter(x=>x.id!=id);
+localStorage.setItem("dataList", JSON.stringify(dataList));
 show();
 }
 
-/* LOGOUT */
-function logout(){
-localStorage.removeItem("login");
-location.reload();
+function download(btn){
+let content = btn.parentElement.innerHTML;
+let w = window.open("");
+w.document.write(content);
+w.print();
 }
 
 show();
+
 </script>
 
 </body>
