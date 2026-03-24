@@ -2,110 +2,123 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title>Gate Pass System</title>
+<title>Gate Pass</title>
 
 <style>
-
-/* BODY */
-body {
+body{
     font-family: Arial;
-    background: #eaeaea;
-    margin: 0;
-    text-align: center;
+    background:#eaeaea;
+    margin:0;
+    text-align:center;
 }
 
-/* HEADING */
-h3 {
-    margin-top: 15px;
-    font-size: 22px;
+/* FORM BIG */
+input, select{
+    padding:12px;
+    margin:6px;
+    width:90%;
+    max-width:400px;
+    font-size:16px;
 }
 
-/* FORM */
-input, select {
-    padding: 10px;
-    margin: 6px;
-    width: 90%;
-    max-width: 350px;
-    font-size: 16px;
-    border: 1px solid #ccc;
+button{
+    padding:10px 18px;
+    margin:8px;
+    font-size:15px;
+    background:#800000;
+    color:white;
+    border:none;
 }
 
-/* BUTTON */
-button {
-    padding: 10px 20px;
-    margin: 10px;
-    font-size: 16px;
-    background: #007bff;
-    color: white;
-    border: none;
-    border-radius: 5px;
+/* PASS WRAPPER (holes ke liye) */
+.wrapper{
+    position:relative;
+    width:95%;
+    max-width:900px;
+    margin:20px auto;
 }
 
-/* PASS BOX */
-.pass {
-    width: 95%;
-    max-width: 1000px;
-    margin: 20px auto;
-    background: white;
-    border: 3px double black;
-    padding: 20px;
-    text-align: left;
-    box-shadow: 0 0 10px rgba(0,0,0,0.2);
+/* HOLES */
+.hole{
+    width:14px;
+    height:14px;
+    background:#eaeaea;
+    border-radius:50%;
+    position:absolute;
+    left:-8px;
 }
 
-/* TITLE */
-.title {
-    font-size: 22px;
-    font-weight: bold;
+.hole.right{
+    left:auto;
+    right:-8px;
+}
+
+/* vertical holes */
+.hole1{top:20px;}
+.hole2{top:80px;}
+.hole3{top:140px;}
+.hole4{top:200px;}
+.hole5{top:260px;}
+
+.hole6{top:20px;}
+.hole7{top:80px;}
+.hole8{top:140px;}
+.hole9{top:200px;}
+.hole10{top:260px;}
+
+/* PASS */
+.pass{
+    background:white;
+    border:2px solid #800000;
+    padding:15px;
+    text-align:left;
+}
+
+/* HEADER */
+.header{
+    border-bottom:2px solid #800000;
+    margin-bottom:5px;
+}
+
+.title{
+    font-size:22px;
+    font-weight:bold;
+    color:#800000;
 }
 
 /* ROW */
-.row {
-    display: flex;
-    justify-content: space-between;
-    margin-top: 15px;
+.row{
+    display:flex;
+    justify-content:space-between;
 }
 
-/* TEXT */
-.left, .right {
-    width: 48%;
-    font-size: 16px;
-    line-height: 1.8;
+.left,.right{
+    width:48%;
+    font-size:15px;
+    line-height:1.6;
 }
 
 /* SIGN */
-.sign {
-    display: flex;
-    justify-content: space-between;
-    margin-top: 35px;
-    font-size: 16px;
+.sign{
+    display:flex;
+    justify-content:space-between;
+    margin-top:20px;
 }
 
 /* MOBILE */
-@media(max-width: 600px){
-    .row {
-        flex-direction: column;
-    }
-    .left, .right {
-        width: 100%;
-    }
+@media(max-width:600px){
+.row{flex-direction:column;}
+.left,.right{width:100%;}
 }
-
-/* PRINT */
-@media print {
-    body * { visibility: hidden; }
-    .printable, .printable * { visibility: visible; }
-}
-
 </style>
 
 </head>
 
 <body>
 
-<h3>Gate Pass Entry Form</h3>
+<h2>Gate Pass Entry</h2>
 
-<input id="date" placeholder="Date"><br>
+<input type="date" id="date"><br>
 <input id="transporter" placeholder="Transporter"><br>
 <input id="from" placeholder="From"><br>
 <input id="driver" placeholder="Driver Name"><br>
@@ -115,29 +128,10 @@ button {
 <input id="dept" placeholder="Department"><br>
 <input id="personMeet" placeholder="Person Meet"><br>
 
-<select id="dvr">
-<option value="">DVR</option>
-<option>1</option>
-<option>0</option>
-</select>
-
-<select id="ldr">
-<option value="">LDR</option>
-<option>1</option>
-<option>0</option>
-</select>
-
-<select id="clr">
-<option value="">CLR</option>
-<option>1</option>
-<option>0</option>
-</select>
-
-<select id="oep">
-<option value="">OEP</option>
-<option>1</option>
-<option>0</option>
-</select><br>
+<select id="dvr"><option>DVR</option><option>1</option><option>0</option></select>
+<select id="ldr"><option>LDR</option><option>1</option><option>0</option></select>
+<select id="clr"><option>CLR</option><option>1</option><option>0</option></select>
+<select id="oep"><option>OEP</option><option>1</option><option>0</option></select><br>
 
 <input id="person" placeholder="Total Person"><br>
 
@@ -152,38 +146,39 @@ button {
 
 <div id="list"></div>
 
+<script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
+
 <script>
 
 let entryNo = localStorage.getItem("entryNo") || 2604118000;
 let dataList = JSON.parse(localStorage.getItem("dataList")) || [];
 
 function save(){
-
 entryNo++;
 localStorage.setItem("entryNo", entryNo);
 
-let data = {
-id: Date.now(),
-date: date.value,
-transporter: transporter.value,
-from: from.value,
-driver: driver.value,
-vehicle: vehicle.value,
-goods: goods.value,
-dept: dept.value,
-personMeet: personMeet.value,
-dvr: dvr.value,
-ldr: ldr.value,
-clr: clr.value,
-oep: oep.value,
-person: person.value,
-type: type.value,
-time: new Date().toLocaleTimeString(),
-entryNo: entryNo
+let d={
+id:Date.now(),
+date:date.value,
+transporter:transporter.value,
+from:from.value,
+driver:driver.value,
+vehicle:vehicle.value,
+goods:goods.value,
+dept:dept.value,
+personMeet:personMeet.value,
+dvr:dvr.value,
+ldr:ldr.value,
+clr:clr.value,
+oep:oep.value,
+person:person.value,
+type:type.value,
+time:new Date().toLocaleTimeString(),
+entryNo:entryNo
 };
 
-dataList.push(data);
-localStorage.setItem("dataList", JSON.stringify(dataList));
+dataList.push(d);
+localStorage.setItem("dataList",JSON.stringify(dataList));
 
 clearForm();
 show();
@@ -195,37 +190,54 @@ document.querySelectorAll("select").forEach(s=>s.selectedIndex=0);
 }
 
 function show(){
+let html="";
+dataList.forEach(d=>{
 
-let html = "";
+html+=`
+<div class="wrapper" id="pass${d.id}">
 
-dataList.forEach(d => {
+<!-- LEFT HOLES -->
+<div class="hole hole1"></div>
+<div class="hole hole2"></div>
+<div class="hole hole3"></div>
+<div class="hole hole4"></div>
+<div class="hole hole5"></div>
 
-html += `
-<div class="pass printable">
+<!-- RIGHT HOLES -->
+<div class="hole right hole6"></div>
+<div class="hole right hole7"></div>
+<div class="hole right hole8"></div>
+<div class="hole right hole9"></div>
+<div class="hole right hole10"></div>
 
+<div class="pass">
+
+<div class="header">
 <div class="title">Arvind Limited</div>
+</div>
 
 <div class="row">
 <div class="left">
-<b>Date:</b> ${d.date}<br>
-<b>Transporter:</b> ${d.transporter}<br>
-<b>From:</b> ${d.from}<br>
-<b>Driver:</b> ${d.driver}<br>
-<b>Vehicle No:</b> ${d.vehicle}<br>
-<b>Goods Type:</b> ${d.goods}<br>
-<b>Department:</b> ${d.dept}<br>
-<b>Person Meet:</b> ${d.personMeet}
+<b>Vehicle Entry Pass</b><br>
+Date: ${d.date}<br>
+Transporter: ${d.transporter}<br>
+From: ${d.from}<br>
+Driver Name: ${d.driver}<br>
+Vehicle No: ${d.vehicle}<br>
+Goods Type: ${d.goods}<br>
+Department: ${d.dept}<br>
+Person Meet: ${d.personMeet}
 </div>
 
 <div class="right">
-<b>Vehicle Entry No:</b> ${d.entryNo}<br>
-<b>In Time:</b> ${d.time}<br>
-<b>Veh Ent Type:</b> ${d.type}<br>
-<b>DVR:</b> ${d.dvr}<br>
-<b>LDR:</b> ${d.ldr}<br>
-<b>CLR:</b> ${d.clr}<br>
-<b>OEP:</b> ${d.oep}<br>
-<b>Total Person:</b> ${d.person}
+Vehicle Entry No: ${d.entryNo}<br>
+In Time: ${d.time}<br>
+Veh Ent Type: ${d.type}<br>
+DVR: ${d.dvr}<br>
+LDR: ${d.ldr}<br>
+CLR: ${d.clr}<br>
+OEP: ${d.oep}<br>
+Total Person: ${d.person}
 </div>
 </div>
 
@@ -234,44 +246,46 @@ html += `
 <div>Sign (Authority)</div>
 </div>
 
+<button onclick="downloadImage('pass${d.id}')">Download</button>
 <button onclick="edit(${d.id})">Edit</button>
-<button onclick="download(this)">Download</button>
 
+</div>
 </div>
 `;
 });
+list.innerHTML=html;
+}
 
-document.getElementById("list").innerHTML = html;
+function downloadImage(id){
+html2canvas(document.getElementById(id)).then(canvas=>{
+let link=document.createElement("a");
+link.download="gatepass.png";
+link.href=canvas.toDataURL();
+link.click();
+});
 }
 
 function edit(id){
-let d = dataList.find(x=>x.id==id);
+let d=dataList.find(x=>x.id==id);
 
-date.value = d.date;
-transporter.value = d.transporter;
-from.value = d.from;
-driver.value = d.driver;
-vehicle.value = d.vehicle;
-goods.value = d.goods;
-dept.value = d.dept;
-personMeet.value = d.personMeet;
-dvr.value = d.dvr;
-ldr.value = d.ldr;
-clr.value = d.clr;
-oep.value = d.oep;
-person.value = d.person;
-type.value = d.type;
+date.value=d.date;
+transporter.value=d.transporter;
+from.value=d.from;
+driver.value=d.driver;
+vehicle.value=d.vehicle;
+goods.value=d.goods;
+dept.value=d.dept;
+personMeet.value=d.personMeet;
+dvr.value=d.dvr;
+ldr.value=d.ldr;
+clr.value=d.clr;
+oep.value=d.oep;
+person.value=d.person;
+type.value=d.type;
 
-dataList = dataList.filter(x=>x.id!=id);
-localStorage.setItem("dataList", JSON.stringify(dataList));
+dataList=dataList.filter(x=>x.id!=id);
+localStorage.setItem("dataList",JSON.stringify(dataList));
 show();
-}
-
-function download(btn){
-let content = btn.parentElement.innerHTML;
-let w = window.open("");
-w.document.write(content);
-w.print();
 }
 
 show();
