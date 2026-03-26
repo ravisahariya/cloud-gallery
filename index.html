@@ -2,9 +2,9 @@
 <html>
 <head>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>My Secure App</title>
+<title>Ravi Secure App</title>
 
-<!-- Firebase -->
+<!-- Firebase (compat version) -->
 <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
 <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
 <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
@@ -56,7 +56,6 @@ border-radius:10px;
 <button onclick="register()">Register</button>
 <button onclick="login()">Login</button>
 <button onclick="forgot()">Forgot Password</button>
-
 </div>
 
 <div class="box" id="dashboard">
@@ -72,13 +71,18 @@ border-radius:10px;
 
 <script>
 
-// 🔥 APNA FIREBASE CONFIG YAHAN DAALO
+// 🔥 YOUR FIREBASE CONFIG (already added)
 const firebaseConfig = {
-apiKey: "YOUR_API_KEY",
-authDomain: "YOUR_PROJECT.firebaseapp.com",
-projectId: "YOUR_PROJECT_ID"
+  apiKey: "AIzaSyBjBnmYvtdJGmKovVn9VB5vFXaG7vHedN0",
+  authDomain: "project-7422c593-fd12-4d96-847.firebaseapp.com",
+  projectId: "project-7422c593-fd12-4d96-847",
+  storageBucket: "project-7422c593-fd12-4d96-847.firebasestorage.app",
+  messagingSenderId: "541255136170",
+  appId: "1:541255136170:web:59af7e084897394153f1d3",
+  measurementId: "G-CRZ9MW1E95"
 };
 
+// Initialize Firebase
 firebase.initializeApp(firebaseConfig);
 
 const auth = firebase.auth();
@@ -87,7 +91,7 @@ const db = firebase.firestore();
 // Register
 function register(){
 auth.createUserWithEmailAndPassword(email.value,password.value)
-.then(()=>alert("Registered"))
+.then(()=>alert("Registered Successfully"))
 .catch(e=>alert(e.message));
 }
 
