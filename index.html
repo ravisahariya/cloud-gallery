@@ -1,265 +1,140 @@
 <!DOCTYPE html>
 <html>
 <head>
-<meta charset="UTF-8">
-<title>Gate Pass</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>My Secure App</title>
+
+<!-- Firebase -->
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
 
 <style>
 body{
-    font-family: Arial;
-    background:#eaeaea;
-    margin:0;
-    text-align:center;
+font-family:Arial;
+background:linear-gradient(135deg,#141e30,#243b55);
+color:white;
+text-align:center;
 }
 
-/* FORM */
-input, select{
-    padding:12px;
-    margin:6px;
-    width:90%;
-    max-width:400px;
-    font-size:16px;
+.box{
+background:rgba(255,255,255,0.1);
+padding:20px;
+margin:50px auto;
+width:300px;
+border-radius:15px;
 }
 
-/* BUTTON */
+input,textarea{
+width:90%;
+padding:10px;
+margin:5px;
+}
+
 button{
-    padding:10px 18px;
-    margin:5px;
-    font-size:15px;
-    background:#800000;
-    color:white;
-    border:none;
+padding:10px;
+margin:5px;
+width:90%;
+background:#00c6ff;
+border:none;
+color:white;
+border-radius:10px;
 }
 
-/* PASS */
-.wrapper{
-    width:95%;
-    max-width:900px;
-    margin:20px auto;
-}
-
-.pass{
-    background:white;
-    border:2px solid #800000;
-    padding:10px;
-}
-
-/* TOP HEADER */
-.top{
-    border-bottom:2px solid #800000;
-    padding-bottom:5px;
-}
-
-.title{
-    font-size:20px;
-    font-weight:bold;
-    color:#800000;
-}
-
-/* SECOND HEADER */
-.subhead{
-    display:flex;
-    justify-content:space-between;
-    margin-top:5px;
-    font-weight:bold;
-}
-
-/* BODY */
-.row{
-    display:flex;
-    justify-content:space-between;
-    margin-top:8px;
-}
-
-.left,.right{
-    width:48%;
-    font-size:15px;
-    line-height:1.7;
-}
-
-/* SIGN */
-.sign{
-    display:flex;
-    justify-content:space-between;
-    margin-top:25px;
-}
-
-/* MOBILE */
-@media(max-width:600px){
-.row{flex-direction:column;}
-.left,.right{width:100%;}
-}
+#dashboard{display:none;}
 </style>
-
 </head>
 
 <body>
 
-<h2>Gate Pass Entry</h2>
+<div class="box" id="loginBox">
+<h2>Login / Register</h2>
 
-<input type="date" id="date"><br>
-<input id="transporter" placeholder="Transporter"><br>
-<input id="from" placeholder="From"><br>
-<input id="driver" placeholder="Driver Name"><br>
-<input id="vehicle" placeholder="Vehicle No"><br>
+<input id="email" placeholder="Email"><br>
+<input id="password" type="password" placeholder="Password"><br>
 
-<input id="goods" placeholder="Goods Type"><br>
-<input id="dept" placeholder="Department"><br>
-<input id="personMeet" placeholder="Person Meet"><br>
+<button onclick="register()">Register</button>
+<button onclick="login()">Login</button>
+<button onclick="forgot()">Forgot Password</button>
 
-<select id="dvr"><option>DVR</option><option>1</option><option>0</option></select>
-<select id="ldr"><option>LDR</option><option>1</option><option>0</option></select>
-<select id="clr"><option>CLR</option><option>1</option><option>0</option></select>
-<select id="oep"><option>OEP</option><option>1</option><option>0</option></select><br>
+</div>
 
-<input id="person" placeholder="Total Person"><br>
+<div class="box" id="dashboard">
+<h2>My Data</h2>
 
-<select id="type">
-<option>External</option>
-<option>Internal</option>
-</select><br>
+<textarea id="data" rows="5" placeholder="Apna data yahan likho"></textarea><br>
 
 <button onclick="save()">Save</button>
+<button onclick="logout()">Logout</button>
 
-<hr>
-
-<div id="list"></div>
-
-<script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
+<p id="msg"></p>
+</div>
 
 <script>
 
-let entryNo = localStorage.getItem("entryNo") || 2604118000;
-let dataList = JSON.parse(localStorage.getItem("dataList")) || [];
-
-function save(){
-entryNo++;
-localStorage.setItem("entryNo", entryNo);
-
-let d={
-id:Date.now(),
-date:date.value,
-transporter:transporter.value,
-from:from.value,
-driver:driver.value,
-vehicle:vehicle.value,
-goods:goods.value,
-dept:dept.value,
-personMeet:personMeet.value,
-dvr:dvr.value,
-ldr:ldr.value,
-clr:clr.value,
-oep:oep.value,
-person:person.value,
-type:type.value,
-time:new Date().toLocaleTimeString(),
-entryNo:entryNo
+// 🔥 APNA FIREBASE CONFIG YAHAN DAALO
+const firebaseConfig = {
+apiKey: "YOUR_API_KEY",
+authDomain: "YOUR_PROJECT.firebaseapp.com",
+projectId: "YOUR_PROJECT_ID"
 };
 
-dataList.push(d);
-localStorage.setItem("dataList",JSON.stringify(dataList));
+firebase.initializeApp(firebaseConfig);
 
-clearForm();
-show();
+const auth = firebase.auth();
+const db = firebase.firestore();
+
+// Register
+function register(){
+auth.createUserWithEmailAndPassword(email.value,password.value)
+.then(()=>alert("Registered"))
+.catch(e=>alert(e.message));
 }
 
-function clearForm(){
-document.querySelectorAll("input").forEach(i=>i.value="");
-document.querySelectorAll("select").forEach(s=>s.selectedIndex=0);
+// Login
+function login(){
+auth.signInWithEmailAndPassword(email.value,password.value)
+.then(()=>{
+loginBox.style.display="none";
+dashboard.style.display="block";
+load();
+})
+.catch(e=>alert(e.message));
 }
 
-function show(){
-let html="";
-dataList.forEach(d=>{
+// Forgot password
+function forgot(){
+auth.sendPasswordResetEmail(email.value)
+.then(()=>alert("Reset email bhej diya"))
+.catch(e=>alert(e.message));
+}
 
-html+=`
-<div class="wrapper">
-
-<div class="pass" id="pass${d.id}">
-
-<div class="top">
-<div class="title">Arvind Limited</div>
-</div>
-
-<div class="subhead">
-<div>Vehicle Entry Pass</div>
-<div>Vehicle Entry No: ${d.entryNo}</div>
-</div>
-
-<div class="row">
-<div class="left">
-Date: ${d.date}<br>
-Transporter: ${d.transporter}<br>
-From: ${d.from}<br>
-Driver Name: ${d.driver}<br>
-Vehicle No: ${d.vehicle}<br>
-Goods Type: ${d.goods}<br>
-Department: ${d.dept}<br>
-Person Meet: ${d.personMeet}
-</div>
-
-<div class="right">
-In Time: ${d.time}<br>
-Veh Ent Type: ${d.type}<br>
-DVR: ${d.dvr}<br>
-LDR: ${d.ldr}<br>
-CLR: ${d.clr}<br>
-OEP: ${d.oep}<br>
-Total Person: ${d.person}
-</div>
-</div>
-
-<div class="sign">
-<div>Sign (Transporter)</div>
-<div>Sign (Authority)</div>
-</div>
-
-</div>
-
-<div>
-<button onclick="downloadImage('pass${d.id}')">Download</button>
-<button onclick="edit(${d.id})">Edit</button>
-</div>
-
-</div>
-`;
+// Save data
+function save(){
+let user=auth.currentUser;
+db.collection("users").doc(user.uid).set({
+data:data.value
 });
-list.innerHTML=html;
+msg.innerText="Saved!";
 }
 
-function downloadImage(id){
-html2canvas(document.getElementById(id)).then(canvas=>{
-let link=document.createElement("a");
-link.download="gatepass.png";
-link.href=canvas.toDataURL();
-link.click();
+// Load data
+function load(){
+let user=auth.currentUser;
+
+db.collection("users").doc(user.uid).get()
+.then(doc=>{
+if(doc.exists){
+data.value=doc.data().data;
+}
 });
 }
 
-function edit(id){
-let d=dataList.find(x=>x.id==id);
-
-date.value=d.date;
-transporter.value=d.transporter;
-from.value=d.from;
-driver.value=d.driver;
-vehicle.value=d.vehicle;
-goods.value=d.goods;
-dept.value=d.dept;
-personMeet.value=d.personMeet;
-dvr.value=d.dvr;
-ldr.value=d.ldr;
-clr.value=d.clr;
-oep.value=d.oep;
-person.value=d.person;
-type.value=d.type;
-
-dataList=dataList.filter(x=>x.id!=id);
-localStorage.setItem("dataList",JSON.stringify(dataList));
-show();
+// Logout
+function logout(){
+auth.signOut();
+location.reload();
 }
-
-show();
 
 </script>
 
